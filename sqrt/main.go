@@ -16,18 +16,15 @@ import (
 )
 
 func solver(a, b, c float64) (x1, x2 complex128) {
-	D := (b * b) - (4 * a * c)
-	if D < 0 {
-		ax := complex(a, 0i)
-		bx := complex(b, 0i)
-		cx := complex(c, 0i)
-		Dx := (bx * bx) - (4 * ax * cx)
-		x1 = (-bx + cmplx.Sqrt(Dx)) / (2 * ax)
-		x2 = (-bx - cmplx.Sqrt(Dx)) / (2 * ax)
-	} else {
-		x1 = complex(((-b + math.Sqrt(D)) / (2 * a)), 0i)
-		x2 = complex(((-b - math.Sqrt(D)) / (2 * a)), 0i)
-	}
+	// Convert everything to complex once
+	ax := complex(a, 0)
+	bx := complex(b, 0)
+	cx := complex(c, 0)
+
+	D := bx*bx - 4*ax*cx // Discriminant as complex
+	x1 = (-bx + cmplx.Sqrt(D)) / (2 * ax)
+	x2 = (-bx - cmplx.Sqrt(D)) / (2 * ax)
+
 	return x1, x2
 }
 
@@ -82,6 +79,7 @@ func main() {
 	} else {
 		fmt.Printf("Получены значения корней:   X1 = %#v , \t X2 = %#v \n", X1, X2)
 	}
+	fmt.Println()
 	os.Exit(0)
 
 }
