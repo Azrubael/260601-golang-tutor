@@ -1,5 +1,6 @@
-Підказки для роботи зі стилями MSExcel
+## Приклади роботи зі стилями MSExcel
 
+##### Створення нових стилів
 ```go
     var err_txt string = "Помилка створення стилю для клітинок "
     style2, err2 := vopi_xlsx.NewStyle(&excelize.Style{
@@ -42,6 +43,7 @@
 	
 ```
 
+##### Застосування стилів
 ```go
 
 // припускаємо: f *excelize.File, sheet string, coord string, val interface{}

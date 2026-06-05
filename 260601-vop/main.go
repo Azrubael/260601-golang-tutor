@@ -68,54 +68,6 @@ func coord(col, row int) string {
 }
 
 
-func ensureWrapText(f *excelize.File, sheet, coord string) error {
-    // Отримати поточний styleID (0 якщо немає)
-    styleID, err := f.GetCellStyle(sheet, coord)
-    if err != nil {
-        return err
-    }
-
-    // Якщо styleID == 0 — немає явного стилю; створимо новий із wrap_text
-    if styleID == 0 {
-        newStyle, err := f.NewStyle(&excelize.Style{
-            Alignment: &excelize.Alignment{WrapText: true},
-        })
-        if err != nil {
-            return err
-        }
-        return f.SetCellStyle(sheet, coord, coord, newStyle)
-    }
-
-    // Якщо style є — прочитаємо його як XML, змодифікуємо alignment.wrapText і створимо новий стиль, зберігши інші властивості.
-    style, err := f.GetStyle(styleID)
-    if err != nil {
-        // Якщо не вдається прочитати повний стиль, застосуємо простий wrap-only стиль
-        newStyle, err2 := f.NewStyle(&excelize.Style{
-            Alignment: &excelize.Alignment{WrapText: true},
-        })
-        if err2 != nil {
-            return err2
-        }
-        return f.SetCellStyle(sheet, coord, coord, newStyle)
-    }
-
-    // Модифікуємо alignment (створимо копію)
-    if style.Alignment == nil {
-        style.Alignment = &excelize.Alignment{}
-    }
-    style.Alignment.WrapText = true
-
-    // Створимо новий стиль на основі модифікованого опису
-    newStyleID, err := f.NewStyle(style)
-    if err != nil {
-        return err
-    }
-
-    // Застосуємо новий стиль до клітинки
-    return f.SetCellStyle(sheet, coord, coord, newStyleID)
-}
-
-
 func main() {
     if len(os.Args) != 2 {
         fmt.Printf("Використання: go run %s <vop.xlsx>\n", filepath.Base(os.Args[0]))
@@ -172,14 +124,8 @@ func main() {
         os.Exit(4)
     }
 
-    // Отримання списку листів в файлі з даними ВОПів
-    vopi_sheets := vopi_xlsx.GetSheetList()
-    fmt.Println(vopi_sheets)
-
-
-
-    for i := 1; i < len(vopi_sheets); i++ {
-        vopi_sheet := vopi_sheets[i]
+    // Отримання доступу до аркушів в файлі з даними ВОПів
+    for _, vopi_sheet := range vopi_xlsx.GetSheetList() {
         // Отримання таблиці даних "ВОП" у вигляді рядків
         vopi_rows, err_vopi := vopi_xlsx.GetRows(vopi_sheet)
         if err_vopi != nil {
@@ -225,20 +171,25 @@ func main() {
                     fmt.Println(fmt.Errorf("Помилка запису телефону: %w", err_telephone))
                     os.Exit(15)
                 }
-                fmt.Println(person.Rank + " " + cleaned_name)
+                // fmt.Println(person.Rank + " " + cleaned_name)
 
                 // Переконатись, що wrap_text увімкнено, не втративши інших властивостей
-                err_tel_wrap := ensureWrapText(vopi_xlsx, vopi_sheet, coord_tel)
+                err_tel_wrap := EnsureWrapText(vopi_xlsx, vopi_sheet, coord_tel)
                 if err_tel_wrap != nil {
                     fmt.Println(fmt.Errorf("Помилка форматування ячейки для телефонного номеру: %w", err_tel_wrap))
                     os.Exit(1)
                 }
-
-
+                err_wrap_tel := SetRowHeightXlsx(vopi_xlsx, vopi_sheet, vopi_row, 15.0, person.Telephone)
+                if err_wrap_tel != nil {
+                    message := fmt.Errorf("Помилка встановлення висоти рядка для %s : %w", cleaned_name, err_wrap_tel)
+                    fmt.Println(message)
+                }
+                
             } else if cleaned_name != "" {
                 message := fmt.Sprintf("Ім'я %s не знайдено в ШПС %s", cleaned_name, shpk_file)
                 fmt.Println(message)
             }
+            
         }
     }
 
