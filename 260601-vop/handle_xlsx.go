@@ -6,7 +6,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-// Функція для встановлення wrap_text для ячейки, зберігши інші властивості
+// EnsureWrapText встановлює wrap_text для ячейки, зберігши інші властивості
 func EnsureWrapText(f *excelize.File, sheet, coord string) error {
     // Отримати поточний styleID (0 якщо немає)
     styleID, err := f.GetCellStyle(sheet, coord)
@@ -14,8 +14,7 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
         return err
     }
 
-    // Якщо немає стилю — застосуємо простий wrap-only стиль
-    if styleID == 0 {
+    if styleID == 0 { // Якщо немає стилю — застосуємо простий wrap-only стиль
         newStyle, err := f.NewStyle(&excelize.Style{
             Alignment: &excelize.Alignment{WrapText: true},
         })
@@ -25,8 +24,7 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
         return f.SetCellStyle(sheet, coord, coord, newStyle)
     }
 
-    // Отримати повний опис стилю
-    origStyle, err := f.GetStyle(styleID)
+    origStyle, err := f.GetStyle(styleID)   // Отримати повний опис стилю
     if err != nil {
         // fallback: застосуємо wrap-only стиль
         newStyle, err2 := f.NewStyle(&excelize.Style{
@@ -38,7 +36,7 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
         return f.SetCellStyle(sheet, coord, coord, newStyle)
     }
 
-    // Скопіюємо повністю всі підполя, роблячи deep copy структур, і тільки встановимо WrapText = true.
+    // deep copy структури Style і втановлення WrapText = true.
     s := &excelize.Style{}
 
     if origStyle.Font != nil {
@@ -74,7 +72,7 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
     if origStyle.NumFmt != 0 {
         s.NumFmt = origStyle.NumFmt
     }
-    // Alignment: скопіюємо або створимо нову і встановимо WrapText = true
+    // Alignment: копіюємо або створюємо нову і встановимо WrapText = true
     if origStyle.Alignment != nil {
         a := *origStyle.Alignment
         a.WrapText = true
@@ -83,9 +81,9 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
         s.Alignment = &excelize.Alignment{WrapText: true}
     }
 
-    // Якщо інші (майбутні) поля є — можна додати їх тут аналогічно.
+    // Якщо будуть інші елементи стилю, можна додати їх тут.
 
-    // Створимо новий стиль на основі скопійованого опису
+    // Створюємо новий стиль на основі скопійованого опису
     newStyleID, err := f.NewStyle(s)
     if err != nil {
         // Якщо все ще помилка — як останній захід застосуємо простий wrap-only стиль
@@ -96,11 +94,12 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
         return f.SetCellStyle(sheet, coord, coord, fallback)
     }
 
-    // Застосуємо новий стиль до клітинки
+    // Застосовуємо новий стиль до клітинки
     return f.SetCellStyle(sheet, coord, coord, newStyleID)
 }
 
 
+// SetRowHeightXlsx встановлює висоту рядка, зберігши інші властивості
 func SetRowHeightXlsx(f *excelize.File, sheet string, row int, height float64, txt string) error {
     
     wrap_lines := len(strings.Fields(txt))

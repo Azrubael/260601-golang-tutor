@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+	// Заборонити табуляції у файлах загалом
+	"editor.insertSpaces": true,
+	"editor.detectIndentation": false,
+
+	"editor.tabSize": 2,
+
+	// Форматування Go — використовувати gofmt або goimports; вони поважають пробіли замість табів
+	"gopls": {
+		"formatting.gofumpt": false
+	},
+	"[go]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+        "editor.detectIndentation": false
+
+},
+
+    // Форматування Python — використовувати black
+    "python.formatting.provider": "black",
+
+}
+}
