@@ -1,0 +1,140 @@
+package main
+
+import (
+	"image/color"
+	"log"
+
+	"gioui.org/app"
+	"gioui.org/font/gofont"
+	"gioui.org/io/system"
+	"gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/op/paint"
+	"gioui.org/unit"
+	"gioui.org/widget"
+	"gioui.org/widget/material"
+)
+
+func main() {
+	go func() {
+		w := app.NewWindow(app.Title("Hello World"))
+		if err := loop(w); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	app.Main()
+}
+
+func loop(w *app.Window) error {
+	th := material.NewTheme(gofont.Collection())
+
+	// Simple state: label text and menu visibility toggles.
+	var (
+		labelText = "Hello, world!"
+		cmdBtn    widget.Clickable
+		helpBtn   widget.Clickable
+		sayHello  widget.Clickable
+		about     widget.Clickable
+		quit      widget.Clickable
+		showCmd   bool
+		showHelp  bool
+	)
+
+	for {
+		e := <-w.Events()
+		switch ev := e.(type) {
+		case system.DestroyEvent:
+			return ev.Err
+		case system.FrameEvent:
+			gtx := layout.NewContext(&ev.Queue, ev)
+
+			// Build UI
+			opStack := op.Record(gtx.Ops)
+			// Background
+			paint.Fill(gtx.Ops, color.NRGBA{R: 0xff, G: 0xff, B: 0xff, A: 0xff})
+
+			// Top bar with two pulldown-like buttons
+			layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					btn := material.Button(th, &cmdBtn, "Command")
+					btn.Font.Size = unit.Sp(16)
+					if cmdBtn.Clicked() {
+						showCmd = !showCmd
+						showHelp = false
+					}
+					return btn.Layout(gtx)
+				}),
+				layout.Rigid(layout.Spacer{Width: unit.Dp(8)}.Layout),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					btn := material.Button(th, &helpBtn, "Help")
+					btn.Font.Size = unit.Sp(16)
+					if helpBtn.Clicked() {
+						showHelp = !showHelp
+						showCmd = false
+					}
+					return btn.Layout(gtx)
+				}),
+			)
+
+			// Command menu
+			if showCmd {
+				layout.Stack{}.Layout(gtx,
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								b := material.Button(th, &sayHello, "Say Hello")
+								if sayHello.Clicked() {
+									labelText = "Hello from Command → Say Hello"
+									showCmd = false
+								}
+								return b.Layout(gtx)
+							}),
+							layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+								b := material.Button(th, &quit, "Quit")
+								if quit.Clicked() {
+									return layout.Dimensions{} // will quit below
+								}
+								return b.Layout(gtx)
+							}),
+						)
+					}),
+				)
+			}
+
+			// Help menu
+			if showHelp {
+				layout.Stack{}.Layout(gtx,
+					layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						b := material.Button(th, &about, "About")
+						if about.Clicked() {
+							labelText = "Hello World — Gio minimal example"
+							showHelp = false
+						}
+						return b.Layout(gtx)
+					}),
+				)
+			}
+
+			// Main content: label
+			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceEnd}.Layout(gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					// add some vertical space
+					gtx.Constraints.Min.Y = gtx.Px(unit.Dp(20))
+					return layout.Dimensions{Size: gtx.Constraints.Min}
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					lbl := material.H1(th, labelText)
+					return lbl.Layout(gtx)
+				}),
+			)
+
+			// handle Quit click (close window)
+			if quit.Clicked() {
+				w.Perform(system.ActionClose)
+			}
+
+			_ = opStack.Stop()
+			ev.Frame(gtx.Ops)
+		}
+	}
+}
