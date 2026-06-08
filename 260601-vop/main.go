@@ -80,6 +80,7 @@ func main() {
 	shpk_xlsx, err_shpk := excelize.OpenFile(shpk_file)
 	if err_shpk != nil {
 		fmt.Println(fmt.Errorf("Помилка відкриття %s: %w", shpk_file, err_shpk))
+		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 		os.Exit(2)
 	}
 
