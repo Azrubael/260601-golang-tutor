@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"gioui.org/app"
@@ -12,6 +16,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
@@ -45,13 +50,16 @@ func main() {
 }
 
 func draw(w *app.Window) error {
+	w_width := 320
+	w_height := 480
 	w.Option(app.Title("GIO UI app"))
-	w.Option(app.Size(unit.Dp(320), unit.Dp(480)))
+	w.Option(app.Size(unit.Dp(w_width), unit.Dp(w_height)))
 
 	var ops op.Ops
-	var startButton widget.Clickable // startButton is a clickable widget
-
-	var boiling bool // is the egg boiling?
+	var startButton widget.Clickable    // startButton is a clickable widget
+	var boiling bool                    // is the egg boiling?
+	var boilDurationInput widget.Editor // A textfield to input boil duration
+	var boilDuration float32
 
 	th := material.NewTheme() // th defines the material design style
 
@@ -71,7 +79,17 @@ func draw(w *app.Window) error {
 			gtx := app.NewContext(&ops, typ)
 			if startButton.Clicked(gtx) {
 				boiling = !boiling
+				if progress >= 1 { // Resetting the boil
+					progress = 0
+				}
+				// Read from the input box
+				inputString := boilDurationInput.Text()
+				inputString = strings.TrimSpace(inputString)
+				inputFloat, _ := strconv.ParseFloat(inputString, 32)
+				boilDuration = float32(inputFloat)
+				boilDuration = boilDuration / (1 - progress)
 			}
+
 			layout.Flex{
 				Axis:    layout.Vertical,   // From top to bottom
 				Spacing: layout.SpaceStart, // Leftover space at the top
@@ -88,6 +106,46 @@ func draw(w *app.Window) error {
 						return layout.Dimensions{Size: d}
 					},
 				),
+				// The inputbox
+				layout.Rigid(
+					func(gtx C) D {
+						// Wrap the editor in material design
+						ed := material.Editor(th, &boilDurationInput, "sec")
+
+						// Define characteristics of the input box
+						boilDurationInput.SingleLine = true
+						boilDurationInput.Alignment = text.Middle
+
+						// Count down the text when boiling
+						if boiling && progress < 1 {
+							boilRemain := (1 - progress) * boilDuration
+							inputStr := fmt.Sprintf("%.1f", math.Round(float64(boilRemain)*10)/10)
+							boilDurationInput.SetText(inputStr)
+						}
+
+						// Define insets ...
+						margins := layout.Inset{
+							Top:    unit.Dp(0),
+							Right:  unit.Dp(w_width / 3),
+							Bottom: unit.Dp(25),
+							Left:   unit.Dp(w_width / 3),
+						}
+
+						// ... and borders ...
+						border := widget.Border{
+							Color:        color.NRGBA{R: 204, G: 204, B: 204, A: 255},
+							CornerRadius: unit.Dp(3),
+							Width:        unit.Dp(2),
+						}
+
+						// ... before laying it out, one inside the other
+						return margins.Layout(gtx,
+							func(gtx C) D {
+								return border.Layout(gtx, ed.Layout)
+							},
+						)
+					},
+				),
 				layout.Rigid( // Draw a progress bar
 					func(gtx C) D {
 						bar := material.ProgressBar(th, progress)
@@ -95,7 +153,7 @@ func draw(w *app.Window) error {
 					},
 				),
 				layout.Rigid(
-					func(gtx C) D { // Define margins around the button
+					func(gtx C) D { // Define button with margins around it
 						margins := layout.Inset{
 							Top:    unit.Dp(25),
 							Bottom: unit.Dp(25),
