@@ -10,6 +10,7 @@ go mod tidy
 
 c:\Users\User\go\pkg\mod\
 https://pkg.go.dev/gioui.org/example
+https://jonegil.github.io/gui-with-gio/egg_timer/05_button_low_refactored.html
 
 
 

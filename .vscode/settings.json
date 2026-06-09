@@ -1,0 +1,13 @@
+{
+      // Use tabs instead of spaces
+  "editor.insertSpaces": false,
+
+  // Set tab size to 2 spaces
+  "editor.tabSize": 2,
+
+  // Language-specific override for Go
+  "[go]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 2
+  }
+}
