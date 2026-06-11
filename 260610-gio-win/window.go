@@ -23,9 +23,19 @@ func run_window(window *app.Window) error {
 		file_btn                          = new(widget.Clickable)
 		action_btn                        = new(widget.Clickable)
 		help_btn                          = new(widget.Clickable)
+
+		shpk_btn                          = new(widget.Clickable)
+		proto_distrib_btn                 = new(widget.Clickable)
+
+		prep_shpk_btn                     = new(widget.Clickable)
+		prep_ppd_btn                      = new(widget.Clickable)
+		refresh_distrib_btn               = new(widget.Clickable)
+		write_vacation_btn                = new(widget.Clickable)
+		
 		input_window                      = new(widget.Editor)
-		file_open, action_open, help_open bool
-		// new_open, open_open,exit_open bool
+		open_file, open_action, open_help bool
+		define_shpk, define_distrib bool
+		prepare_shpk, prepare_ppd, refresh_distrib, write_vacation bool
 
 		w_width               = 480
 		w_height              = 640
@@ -44,27 +54,25 @@ func run_window(window *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
 			if file_btn.Clicked(gtx) {
-				file_open = !file_open
-				action_open = false
-				help_open = false
+				open_file = !open_file
+				open_action = false
+				open_help = false
 				text_in_window = input_window.Text()
-			}
-			if action_btn.Clicked(gtx) {
-				action_open = !action_open
-				file_open = false
-				help_open = false
-			}
-			if help_btn.Clicked(gtx) {
-				help_open = !help_open
-				action_open = false
-				file_open = false
+			} else if action_btn.Clicked(gtx) {
+				open_action = !open_action
+				open_file = false
+				open_help = false
+			} else if help_btn.Clicked(gtx) {
+				open_help = !open_help
+				open_action = false
+				open_file = false
 			}
 			// Menu bar
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
 				Alignment: layout.Start}.Layout(gtx,
 				// Text above the button
-				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						lbl := material.Body1(theme, "The file name for the report:")
+				layout.Rigid(func(gtx C) D {
+						lbl := material.Body1(theme, "Ім'я файлу для звіту:")
 						lbl.Alignment = text.Middle
 						return lbl.Layout(gtx)
 				}),
@@ -105,78 +113,72 @@ func run_window(window *app.Window) error {
 				),
 				layout.Rigid(func(gtx C) D {
 					return renderMenuButton(gtx, theme, file_btn, "Файл",
-						&file_open, &action_open, &help_open)
+						&open_file, &open_action, &open_help)
 				}),
 				layout.Rigid(func(gtx C) D {
 					return renderMenuButton(gtx, theme, action_btn, "Звіти",
-						&action_open, &file_open, &help_open)
+						&open_action, &open_file, &open_help)
 				}),
 				layout.Rigid(func(gtx C) D {
 					return renderMenuButton(gtx, theme, help_btn, "Допомога",
-						&help_open, &file_open, &action_open)
+						&open_help, &open_file, &open_action)
 				}),
 			)
 
 			// Simple dropdowns under the menu bar
-			if file_open {
+			if open_file {
 				layout.Inset{
 					Top:   unit.Dp(100),
 					Left:  unit.Dp(25),
 					Right: unit.Dp(25),
-				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Визначити ШПК").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return layout.Spacer{Height: unit.Dp(5)}.Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Визначити прототип розподілу").Layout(gtx)
-						}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, shpk_btn, "Визначити ШПК",
+								&define_shpk, &define_distrib)
+							}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, proto_distrib_btn, "Визначити прототип розподілу",
+								&define_distrib, &define_shpk)
+							}),
+					)
+				})
 
-					)
-				})
 			}
-			if action_open {
+			if open_action {
 				layout.Inset{
 					Top:   unit.Dp(100),
 					Left:  unit.Dp(25),
 					Right: unit.Dp(25),
-				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Підготувати дані").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return layout.Spacer{Height: unit.Dp(5)}.Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Записати звіт для стройової").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return layout.Spacer{Height: unit.Dp(5)}.Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Оновити весь розподіл").Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return layout.Spacer{Height: unit.Dp(5)}.Layout(gtx)
-						}),
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-							return material.Button(theme, new(widget.Clickable), "Записати звіт по І відпустці").Layout(gtx)
-						}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, prep_shpk_btn, "Підготувати дані",
+								&prepare_shpk, &prepare_ppd, &refresh_distrib, &write_vacation)
+							}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, prep_ppd_btn, "Записати звіт для стройової",
+								&prepare_ppd, &prepare_shpk, &refresh_distrib, &write_vacation)
+							}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, refresh_distrib_btn, "Оновити весь розподіл",
+								&refresh_distrib, &prepare_ppd, &prepare_shpk, &write_vacation)
+							}),
+						layout.Rigid(func(gtx C) D {
+							return renderMenuButton(gtx, theme, write_vacation_btn, "Записати звіт по І відпустці",
+								&write_vacation, &prepare_ppd, &prepare_shpk, &refresh_distrib)
+							}),
 					)
 				})
 			}
-			if help_open {
+			if open_help {
 				layout.Inset{
 					Top:   unit.Dp(25),
 					Left:  unit.Dp(25),
 					Right: unit.Dp(25),
-				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-						layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+						layout.Rigid(func(gtx C) D {
 							var zmist = "  Ця маленька програма призначена прискорити\n" +
 													"підготовку трьох типів звітів.\n" +
 													"  Після запуску цієї програми, з'явиться вікно, " +
@@ -205,10 +207,8 @@ func run_window(window *app.Window) error {
 
 			layout.Inset{Top: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
 				return title.Layout(gtx)
-			})
+				})
 			}
-
-
 
 			typ.Frame(gtx.Ops)
 		}
@@ -216,7 +216,7 @@ func run_window(window *app.Window) error {
 }
 
 func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
-	name string, current *bool, other1 *bool, other2 *bool) D {
+	name string, current *bool, others ...*bool) D {
 	margins := layout.Inset{
 		Top:    unit.Dp(5),
 		Bottom: unit.Dp(0),
@@ -228,8 +228,9 @@ func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 		func(gtx C) D {
 			if btn.Clicked(gtx) {
 				*current = !*current
-				*other1 = false
-				*other2 = false
+				for _, o := range others {
+						*o = false
+				}
 			}
 			return d
 		},
