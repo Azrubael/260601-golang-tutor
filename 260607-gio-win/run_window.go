@@ -10,7 +10,7 @@ import (
 	"gioui.org/widget/material"
 )
 
-func run_window(window *app.Window) error {
+func window(w *app.Window) error {
 	var ops op.Ops
 	var (
 		fileBtn   = new(widget.Clickable)
@@ -23,7 +23,7 @@ func run_window(window *app.Window) error {
 	theme := material.NewTheme()
 
 	for {
-		switch e := window.Event().(type) {
+		switch e := w.Event().(type) {
 		case app.DestroyEvent:
 			return e.Err
 		case app.FrameEvent:

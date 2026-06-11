@@ -106,10 +106,8 @@ func draw(w *app.Window) error {
 						return layout.Dimensions{Size: d}
 					},
 				),
-				// The inputbox
-				layout.Rigid(
+				layout.Rigid( // Draw the inputbox
 					func(gtx C) D {
-						// Wrap the editor in material design
 						ed := material.Editor(th, &boilDurationInput, "sec")
 
 						// Define characteristics of the input box
