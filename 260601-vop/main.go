@@ -80,15 +80,16 @@ func main() {
 	shpk_xlsx, err_shpk := excelize.OpenFile(shpk_file)
 	if err_shpk != nil {
 		fmt.Println(fmt.Errorf("Помилка відкриття %s: %w", shpk_file, err_shpk))
-		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 		os.Exit(2)
+		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 	}
 
-	// Отрмання таблиці даних "ШПС" у вигляді рядків
+	// Отрмання таблиці даних ШПС у вигляді рядків
 	shpk_rows, err_shpk := shpk_xlsx.GetRows("ШПС")
 	if err_shpk != nil {
 		fmt.Println(fmt.Errorf("Помилка зчитування змісту %s: %w", shpk_file, err_shpk))
 		os.Exit(3)
+		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 	}
 
 	// Структура даних для персоналу
@@ -118,6 +119,7 @@ func main() {
 	if err_vopi != nil {
 		fmt.Println(fmt.Errorf("Помилка відкриття %s: %w", vop_file, err_vopi))
 		os.Exit(4)
+		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 	}
 
 	// Отримання доступу до аркушів в файлі з даними ВОПів
@@ -141,6 +143,7 @@ func main() {
 			if err_name != nil {
 				fmt.Println(fmt.Errorf("Помилка зчитування імені: %w", err_name))
 				os.Exit(10)
+				// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 			}
 			cleaned_name := cleanName(name)
 
@@ -150,22 +153,26 @@ func main() {
 					fmt.Println(person.Rank)
 					fmt.Println(fmt.Errorf("Помилка запису звання: %w", err_rank))
 					os.Exit(12)
+					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 				}
 				err_name := vop_xlsx.SetCellValue(vop_sheet, coord_name, cleaned_name)
 				if err_name != nil {
 					fmt.Println(cleaned_name)
 					fmt.Println(fmt.Errorf("Помилка запису імені: %w", err_name))
 					os.Exit(13)
+					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 				}
 				err_department := vop_xlsx.SetCellValue(vop_sheet, coord_dep, person.Department)
 				if err_department != nil {
 					fmt.Println(fmt.Errorf("Помилка запису підрозділу: %w", err_department))
 					os.Exit(14)
+					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 				}
 				err_telephone := vop_xlsx.SetCellValue(vop_sheet, coord_tel, person.Telephone)
 				if err_telephone != nil {
 					fmt.Println(fmt.Errorf("Помилка запису телефону: %w", err_telephone))
 					os.Exit(15)
+					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 				}
 				// fmt.Println(person.Rank + " " + cleaned_name)
 
@@ -173,6 +180,7 @@ func main() {
 				err_tel_wrap := EnsureWrapText(vop_xlsx, vop_sheet, coord_tel)
 				if err_tel_wrap != nil {
 					fmt.Println(fmt.Errorf("Помилка форматування ячейки для телефонного номеру: %w", err_tel_wrap))
+					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 					os.Exit(16)
 				}
 				err_wrap_tel := SetRowHeightXlsx(vop_xlsx, vop_sheet, vop_row, 15.0, person.Telephone)
@@ -201,6 +209,7 @@ func main() {
 		if err_vopi != nil {
 			fmt.Println(fmt.Errorf("Помилка зчитування змісту %s:\n %w", vop_rows, err_vopi))
 			os.Exit(17)
+			// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
 		}
 		divisions_counter := PersonnelCounter(vop_rows)
 		var found_row int
