@@ -1,14 +1,23 @@
 {
-      // Use tabs instead of spaces
+  // Use tabs instead of spaces
   "editor.insertSpaces": true,
 
   // Set tab size to 2 spaces
-  "editor.tabSize":4,
-
+  "editor.tabSize":2,
+  "files.trimTrailingWhitespace": true,
+  // "emeraldwalk.runonsave": {
+  //   "commands": [
+  //     {
+  //       "match": "\\.go$",
+  //       "cmd": "powershell -NoProfile -NonInteractive -Command \"gofmt -w \\\"${file}\\\"; $p=Get-Content -Raw -LiteralPath \\\"${file}\\\"; $nl=[Environment]::NewLine; $p = $p -replace ($nl + 'func '), ($nl + $nl + 'func '); Set-Content -LiteralPath \\\"${file}\\\" -Value $p -NoNewline\""
+  //     }
+  //   ]
+  // },
   // Language-specific override for Go
   "[go]": {
     "editor.insertSpaces": false,
-    "editor.tabSize": 2
-	"editor.formatOnSave": false
-  }
+    "editor.tabSize": 2,
+	  "editor.formatOnSave": false,
+  },
+
 }
