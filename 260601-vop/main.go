@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -79,17 +80,13 @@ func main() {
 	// Відкриття файлу з ШПС в форматі Excel
 	shpk_xlsx, err_shpk := excelize.OpenFile(shpk_file)
 	if err_shpk != nil {
-		fmt.Println(fmt.Errorf("Помилка відкриття %s: %w", shpk_file, err_shpk))
-		os.Exit(2)
-		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+		log.Printf("Помилка відкриття %s: %v", shpk_file, err_shpk)
 	}
 
 	// Отрмання таблиці даних ШПС у вигляді рядків
 	shpk_rows, err_shpk := shpk_xlsx.GetRows("ШПС")
 	if err_shpk != nil {
-		fmt.Println(fmt.Errorf("Помилка зчитування змісту %s: %w", shpk_file, err_shpk))
-		os.Exit(3)
-		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+		log.Printf("Помилка зчитування змісту аркуша %s: %v", "ШПС", err_shpk)
 	}
 
 	// Структура даних для персоналу
@@ -117,9 +114,7 @@ func main() {
 	// Відкриття файлу з даними ВОПів в форматі Excel
 	vop_xlsx, err_vopi := excelize.OpenFile(vop_file)
 	if err_vopi != nil {
-		fmt.Println(fmt.Errorf("Помилка відкриття %s: %w", vop_file, err_vopi))
-		os.Exit(4)
-		// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+		log.Printf("Помилка відкриття %s: %v", vop_file, err_vopi)
 	}
 
 	// Отримання доступу до аркушів в файлі з даними ВОПів
@@ -127,8 +122,7 @@ func main() {
 		// Отримання таблиці даних "ВОП" у вигляді рядків
 		vop_rows, err_vopi := vop_xlsx.GetRows(vop_sheet)
 		if err_vopi != nil {
-			fmt.Println(fmt.Errorf("Помилка зчитування змісту %s:\n %w", vop_file, err_vopi))
-			os.Exit(5)
+			log.Printf("Помилка зчитування змісту аркуша %s: %v", vop_sheet, err_vopi)
 		} else {
 			message := fmt.Sprintf("Зчитано %d рядків з листа %s", len(vop_rows), vop_sheet)
 			fmt.Println(message)
@@ -141,52 +135,37 @@ func main() {
 			coord_tel := coord(6, vop_row)
 			name, err_name := vop_xlsx.GetCellValue(vop_sheet, coord_name)
 			if err_name != nil {
-				fmt.Println(fmt.Errorf("Помилка зчитування імені: %w", err_name))
-				os.Exit(10)
-				// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+				log.Printf("Помилка зчитування імені %s: %v", name, err_name)
 			}
 			cleaned_name := cleanName(name)
 
 			if person, ok := shpk_data[cleaned_name]; ok {
 				err_rank := vop_xlsx.SetCellValue(vop_sheet, coord_rank, person.Rank)
 				if err_rank != nil {
-					fmt.Println(person.Rank)
-					fmt.Println(fmt.Errorf("Помилка запису звання: %w", err_rank))
-					os.Exit(12)
-					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+					log.Printf("Помилка запису звання %s: %v", person.Rank, err_rank)
 				}
 				err_name := vop_xlsx.SetCellValue(vop_sheet, coord_name, cleaned_name)
 				if err_name != nil {
-					fmt.Println(cleaned_name)
-					fmt.Println(fmt.Errorf("Помилка запису імені: %w", err_name))
-					os.Exit(13)
-					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+					log.Printf("Помилка запису імені %s: %v", cleaned_name, err_name)
 				}
 				err_department := vop_xlsx.SetCellValue(vop_sheet, coord_dep, person.Department)
 				if err_department != nil {
-					fmt.Println(fmt.Errorf("Помилка запису підрозділу: %w", err_department))
-					os.Exit(14)
-					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+					log.Printf("Помилка запису підрозділу для %s: %v", cleaned_name, err_department)
 				}
 				err_telephone := vop_xlsx.SetCellValue(vop_sheet, coord_tel, person.Telephone)
 				if err_telephone != nil {
-					fmt.Println(fmt.Errorf("Помилка запису телефону: %w", err_telephone))
-					os.Exit(15)
-					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+					log.Printf("Помилка запису телефону для %s: %v", cleaned_name, err_telephone)
 				}
 				// fmt.Println(person.Rank + " " + cleaned_name)
 
 				// Переконатись, що wrap_text увімкнено, не втративши інших властивостей
 				err_tel_wrap := EnsureWrapText(vop_xlsx, vop_sheet, coord_tel)
 				if err_tel_wrap != nil {
-					fmt.Println(fmt.Errorf("Помилка форматування ячейки для телефонного номеру: %w", err_tel_wrap))
-					// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
-					os.Exit(16)
+					log.Printf("Помилка форматування ячейки з телефонним номером для %s: %v", cleaned_name, err_tel_wrap)
 				}
 				err_wrap_tel := SetRowHeightXlsx(vop_xlsx, vop_sheet, vop_row, 15.0, person.Telephone)
 				if err_wrap_tel != nil {
-					message := fmt.Errorf("Помилка встановлення висоти рядка для %s : %w", cleaned_name, err_wrap_tel)
-					fmt.Println(message)
+					log.Printf("Помилка встановлення висоти рядка для %s: %v", cleaned_name, err_tel_wrap)
 				}
 
 			} else if cleaned_name != "" {
@@ -207,9 +186,9 @@ func main() {
 	for _, vop_sheet := range vop_xlsx.GetSheetList() {
 		vop_rows, err_vopi := vop_xlsx.GetRows(vop_sheet)
 		if err_vopi != nil {
-			fmt.Println(fmt.Errorf("Помилка зчитування змісту %s:\n %w", vop_rows, err_vopi))
-			os.Exit(17)
-			// log.Printf("%v", err) <<<<<<<<<<<<<<<<<<<<<
+			// fmt.Println(fmt.Errorf("Помилка зчитування змісту %s:\n %w", vop_rows, err_vopi))
+			// os.Exit(17)
+			log.Printf("Помилка зчитування змісту рядків на аркуші %s:\n %v", vop_sheet, err_vopi)
 		}
 		divisions_counter := PersonnelCounter(vop_rows)
 		var found_row int
