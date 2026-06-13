@@ -67,9 +67,7 @@ func main(){
 	if slices.Contains(myArray, valToDel) {
 			mylist.deleteWithValue(valToDel)
 			message = fmt.Sprintf("The value %d has been deleted from myArray.", valToDel)
-		}
-
-	if message == "" {
+	} else {
 		message = fmt.Sprintf("The value %d was not found in myArray.", valToDel)
 	}
 
