@@ -16,10 +16,10 @@ Write-Output "Поточне використання пам'яті контей
 Write-Output "Введіть 'exit' щоб завершити контейнер..."
 
 while ($true) {
-    $anyText = Read-Host "Введіть команду"
-    if ($anyText -eq "exit") {
+    $input = Read-Host "Введіть команду"
+    if ($input -eq "exit") {
         break
     } else {
-        Write-Output "Ви ввели: $anyText"
+        Write-Output "Ви ввели: $input"
     }
 }
