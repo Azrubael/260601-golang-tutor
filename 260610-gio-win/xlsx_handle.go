@@ -30,6 +30,7 @@ type Distribution struct {
 	Total int
 }
 
+// list_of_companies - Впорядкований список підрозділів
 var list_of_companies []string = []string{
 	"упр 3 бо",
 	"1",
@@ -40,8 +41,10 @@ var list_of_companies []string = []string{
 	"від.заб./3 бо",
 	"від.то/3 бо",
 	"м.п./3 бо",
+	"підсумок",
 	}
 
+// MakeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу
 func MakeListOfCompanies() map[string]Distribution {
 	companyDist := make(map[string]Distribution, len(list_of_companies))
 	for _, name := range list_of_companies {
@@ -50,24 +53,24 @@ func MakeListOfCompanies() map[string]Distribution {
 	return companyDist
 }
 
+// CleanName - Очистка імени від зайвих символів
 func CleanName(name string) string {
-	// Очистка імени від зайвих символів
 	if name == "" {
 		return ""
 	}
 	return strings.TrimSpace(strings.ReplaceAll(name, "\n", " "))
 }
 
+// IsShooter - Перевірка, чи відповідає рядок з даними підрозділу регулярному виразу для стрільців
 func IsShooter(division string) bool {
-	// Перевірка, чи відповідає рядок з даними підрозділу регулярному виразу для стрільців
 	pattern := regexp.MustCompile(`^(1|2|3|4)/(1|2|3|4)/3$`)
 	if pattern.MatchString(division) {
 		return true
 	}
 	return false
 }
+// IsCompanyManager - Перевірка, чи відповідає рядок з даними підрозділу регулярному виразу для управління роти
 func IsCompanyManager(division string) bool {
-	// Перевірка, чи відповідає рядок з даними підрозділу регулярному виразу для управління роти
 	pattern := regexp.MustCompile(`^упр\ (1|2|3|4)\/3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -75,8 +78,8 @@ func IsCompanyManager(division string) bool {
 	return false
 }
 
+// IsVidZab - Перевірка чи відноситься військовослужбовець до відділення забезпечення
 func IsVidZab(division string) bool {
-	// Перевірка чи відноситься військовослужбовець до відділення забезпечення
 	pattern := regexp.MustCompile(`^від\.заб\.\/3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -84,8 +87,8 @@ func IsVidZab(division string) bool {
 	return false
 }
 
+// IsVidZv - Перевірка чи відноситься військовослужбовець до відділення зв'язку
 func IsVidZv(division string) bool {
-	// Перевірка чи відноситься військовослужбовець до відділення зв'язку
 	pattern := regexp.MustCompile(`^від\.зв\./3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -93,8 +96,8 @@ func IsVidZv(division string) bool {
 	return false
 }
 
+// IsVidTo - Перевірка чи відноситься військовослужбовець до відділення ехнічного обслуговування
 func IsVidTo(division string) bool {
-	// Перевірка чи відноситься військовослужбовець до відділення ехнічного обслуговування
 	pattern := regexp.MustCompile(`^від\.то\/3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -102,8 +105,8 @@ func IsVidTo(division string) bool {
 	return false
 }
 
+// IsMp - Перевірка чи відноситься військовослужбовець до медичного пункту
 func IsMp(division string) bool {
-	// Перевірка чи відноситься військовослужбовець до медичного пункту
 	pattern := regexp.MustCompile(`^м.п./3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -111,8 +114,8 @@ func IsMp(division string) bool {
 	return false
 }
 
+// IsManager - Перевірка чи відноситься військовослужбовець управління частиною
 func IsManager(division string) bool {
-	// Перевірка чи відноситься військовослужбовець управління частиною
 	pattern := regexp.MustCompile(`^упр 3 бо$`)
 	if pattern.MatchString(division) {
 		return true
@@ -120,8 +123,8 @@ func IsManager(division string) bool {
 	return false
 }
 
+// GetPlatoonAndCompany - Визначення номера взводу та роти по типовому запису підрозділу
 func GetPlatoonAndCompany(division string) (platoon, company string, err error) {
-	// Визначення номера взводу та роти по типовому запису підрозділу
 	shooterRe := regexp.MustCompile(`^(1|2|3|4)/(1|2|3|4)/3$`)
 	matches := shooterRe.FindStringSubmatch(division)
 	if len(matches) > 2 {
@@ -133,6 +136,7 @@ func GetPlatoonAndCompany(division string) (platoon, company string, err error) 
 	return "", "", nil
 }
 
+// getCompanyForManagement - Визначення номера роти по запису підрозділу для управління роти
 func getCompanyForManagement(division string) (string, error) {
 	pattern := regexp.MustCompile(`^упр\ (1|2|3|4)\/3.*$`)
 	m := pattern.FindStringSubmatch(division)
@@ -142,8 +146,8 @@ func getCompanyForManagement(division string) (string, error) {
 	return "", fmt.Errorf("Не можу отримати номер роти по запису підрозділу: %s", division)
 }
 
+// ReadShpkFile - Читання даних з ШПС в структуру даних для персоналу
 func ReadShpkFile(shpk_file string) (map[string]Person, error) {
-	// Структура даних для персоналу
 	shpk_data := make(map[string]Person)
 
 	// Відкриття файлу з ШПС в форматі Excel
@@ -217,8 +221,8 @@ func ReadShpkFile(shpk_file string) (map[string]Person, error) {
 	return shpk_data, err_shpk
 }
 
+// SetRowHeightXlsx - Встановлює висоту рядка в файлі excelize.File, зберігши інші властивості
 func SetRowHeightXlsx(f *excelize.File, sheet string, row int, height float64, txt string) error {
-	// SetRowHeightXlsx встановлює висоту рядка, зберігши інші властивості
 	wrap_lines := len(strings.Fields(txt))
 	if wrap_lines == 1 {
 		return nil
