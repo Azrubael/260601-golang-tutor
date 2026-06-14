@@ -1,4 +1,4 @@
-package main
+package gio_win
 
 import (
 	"fmt"
@@ -51,6 +51,14 @@ func MakeListOfCompanies() map[string]Distribution {
 			companyDist[name] = Distribution{}
 	}
 	return companyDist
+}
+
+// ReadCellSafe - Безпечне отримання значення ячейки, з перевіркою чи вона існує
+func ReadCellSafe(row []string, col int) string {
+	if col < len(row) {
+		return row[col]
+	}
+	return ""
 }
 
 // CleanName - Очистка імени від зайвих символів
@@ -169,10 +177,11 @@ func ReadShpkFile(shpk_file string) (map[string]Person, error) {
 		var err_platoon, err_company error
 		row := shpk_rows[i]
 
-		if len(row) > 16 && row[8] != "" {
-			cleaned_name := CleanName(row[8])
+		raw_name := ReadCellSafe(row, 8)
+		if raw_name != "" {
+			cleaned_name := CleanName(raw_name)
 			if cleaned_name != "" {
-				department = row[10]
+				department = ReadCellSafe(row, 10)
 
 				if IsShooter(department) {
 					platoon, company, err_platoon = GetPlatoonAndCompany(department)
@@ -206,14 +215,14 @@ func ReadShpkFile(shpk_file string) (map[string]Person, error) {
 					Department:   department,
 					Platoon:      platoon,
 					Company:      company,
-					Rank:         row[7],
-					Assignment:   row[20],
-					Hospital:     row[21],
-					Vacation_now: row[23],
-					Study:        row[25],
-					Szch:         row[26],
-					Vacation1:    row[29],
-					Telephone:    row[16],
+					Rank:         ReadCellSafe(row, 7),
+					Assignment:   ReadCellSafe(row, 20),
+					Hospital:     ReadCellSafe(row, 21),
+					Vacation_now: ReadCellSafe(row, 23),
+					Study:        ReadCellSafe(row, 25),
+					Szch:         ReadCellSafe(row, 26),
+					Vacation1:    ReadCellSafe(row, 29),
+					Telephone:    ReadCellSafe(row, 16),
 				}
 			}
 		}

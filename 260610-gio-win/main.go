@@ -1,4 +1,4 @@
-package main
+package gio_win
 
 import (
 	"log"

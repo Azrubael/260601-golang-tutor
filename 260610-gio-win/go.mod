@@ -1,4 +1,4 @@
-module main
+module gio_win
 
 go 1.26.3
 
