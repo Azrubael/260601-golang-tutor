@@ -6,7 +6,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-// EnsureWrapText встановлює wrap_text для ячейки, зберігши інші властивості
+// EnsureWrapText - встановлює wrap_text для ячейки, зберігши інші властивості
 func EnsureWrapText(f *excelize.File, sheet, coord string) error {
     // Отримати поточний styleID (0 якщо немає)
     styleID, err := f.GetCellStyle(sheet, coord)
@@ -99,15 +99,15 @@ func EnsureWrapText(f *excelize.File, sheet, coord string) error {
 }
 
 
-// SetRowHeightXlsx встановлює висоту рядка, зберігши інші властивості
+// SetRowHeightXlsx - встановлює висоту рядка, зберігши інші властивості
 func SetRowHeightXlsx(f *excelize.File, sheet string, row int, height float64, txt string) error {
-    
+
     wrap_lines := len(strings.Fields(txt))
     if wrap_lines == 1 {
         return nil
     }
     required_height := (float64(wrap_lines)) * height
     err_height := f.SetRowHeight(sheet, row, required_height)
-    
+
     return err_height
 }
