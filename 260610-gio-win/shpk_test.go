@@ -20,9 +20,9 @@ func TestReadShpkFile_Success(t *testing.T) {
     }
 }
 
+// TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
-
     shpk, err := ReadShpkFile(path)
     if err != nil {
         t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
@@ -48,8 +48,29 @@ func TestReadShpkFile(t *testing.T) {
       }
       if person.Rank == "" {
         fmt.Printf("Для %s відсутні відсутні дані стосовно підрозділу", name )
-			}
-		}
-
+        }
+    }
 }
 
+func TestCreateReportPPD(t *testing.T, ) {
+    path := "d:/tmp/ШПС-T0320_.xlsx"
+    shpk, err := ReadShpkFile(path)
+    if err != nil {
+        t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
+    }
+
+    counter, _, err_msg := CreateReportPPD(shpk)
+    if err_msg != nil {
+        fmt.Printf("Помилка створення звіту: %v\n", err)
+    }
+    l := len(list_for_ppd_report)
+    fmt.Println("=== Report ===")
+    fmt.Printf("Кількість людей в ШПС: %d\n", len(shpk))
+	for key, d := range counter {
+			fmt.Printf("%q: Offi=%d Serg=%d Sold=%d Total=%d\n",
+					key, d.Offi, d.Serg, d.Sold, d.Total)
+	}
+    fmt.Printf("Кількість людей після обробки: %d\n", counter[list_for_ppd_report[l-1]].Total)
+    // fmt.Println(report)
+
+}
