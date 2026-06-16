@@ -10,7 +10,7 @@ type HashTable struct {
 	array [ArraySize] *bucket
 }
 
-// bucket - is a linked list 
+// bucket - is a linked list
 type bucket struct {
 	head *bucketNode
 }
@@ -30,12 +30,13 @@ func (h *HashTable) Insert(key string) {
 // Search - will take a key and return true if the key is stored in the hash table
 func (h *HashTable) Search(key string) bool {
 		index := hash(key)
+		return h.array[index].search(key)
 }
 
 // Delete - will take a key and telete the corresponding element from the hash table
-func (h *HashTable) Delete(key string) {
-		index := hash(key)
-}
+// func (h *HashTable) Delete(key string) {
+// 		index := hash(key)
+// }
 
 // hash - will take a key and return the result of hash function
 func hash(key string) int {
@@ -79,8 +80,11 @@ func (b *bucket) search(k string) bool {
 func main() {
 	testHashTable := Init()
 	fmt.Println(testHashTable)
-	fmt.Println(hash("RANDY")
-	
+	fmt.Println(hash("RANDY"))
+	testHashTable.Insert("RANDY")
+	fmt.Println(testHashTable.Search("RANDY"), "RANDY")
+	fmt.Println(testHashTable.Search("ANDY"), "ANDY")
+
 	testBucket := &bucket{}
 	testBucket.insert("RANDY")
 	fmt.Println(testBucket.search("RANDY"))
