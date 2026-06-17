@@ -31,7 +31,7 @@ func run_window(window *app.Window) error {
 		prep_ppd_btn                      = new(widget.Clickable)
 		refresh_distrib_btn               = new(widget.Clickable)
 		write_vacation_btn                = new(widget.Clickable)
-		
+
 		input_window                      = new(widget.Editor)
 		open_file, open_action, open_help bool
 		define_shpk, define_distrib bool
@@ -216,7 +216,7 @@ func run_window(window *app.Window) error {
 }
 
 func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
-	name string, current *bool, others ...*bool) D {
+	name string, current *bool /*, handler func()*/, others ...*bool) D {
 	margins := layout.Inset{
 		Top:    unit.Dp(5),
 		Bottom: unit.Dp(0),
@@ -231,6 +231,7 @@ func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 				for _, o := range others {
 						*o = false
 				}
+				// handler() // call the function passed in
 			}
 			return d
 		},
