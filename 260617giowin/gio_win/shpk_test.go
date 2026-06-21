@@ -52,14 +52,14 @@ func TestReadShpkFile(t *testing.T) {
     }
 }
 
-func TestCreateReportPPD(t *testing.T, ) {
+func TestPrepareReportPPD(t *testing.T, ) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
     shpk, err := ReadShpkFile(path)
     if err != nil {
         t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
     }
 
-    counter, _, err_msg := CreateReportPPD(shpk)
+    counter, _, err_msg := PrepareReportPPD(shpk)
     if err_msg != nil {
         fmt.Printf("Помилка створення звіту: %v\n", err)
     }

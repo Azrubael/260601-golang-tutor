@@ -23,51 +23,6 @@ type Person struct {
 	Telephone    string // Телефон
 }
 
-type Distribution struct {
-	Offi int
-	Serg int
-	Sold int
-	Total int
-}
-
-type ShortPersData struct {
-	Name string
-	Department string
-	Rank string
-}
-
-// list_of_companies - Впорядкований список підрозділів
-var list_of_companies []string = []string{
-	"упр 3 бо",
-	"1",
-	"2",
-	"3",
-	"4",
-	"від.зв./3 бо",
-	"від.заб./3 бо",
-	"від.то/3 бо",
-	"м.п./3 бо",
-	"підсумок",
-}
-
-var list_for_ppd_report []string = []string {
-	"ППД",
-	"Відпустка",
-	"Шпиталь",
-	"СЗЧ",
-	"Відрядження",
-	"Загалом",
-}
-
-
-// MakeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу
-func MakeListOfCompanies(list []string) map[string]Distribution {
-	companyDist := make(map[string]Distribution, len(list))
-	for _, name := range list {
-			companyDist[name] = Distribution{}
-	}
-	return companyDist
-}
 
 // ReadCellSafe - Безпечне отримання значення ячейки, з перевіркою чи вона існує
 func ReadCellSafe(row []string, col int) string {
