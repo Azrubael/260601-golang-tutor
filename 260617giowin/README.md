@@ -90,3 +90,19 @@ set GOVERSION=go1.26.3
 set GOWORK=
 set PKG_CONFIG=pkg-config
 ```
+
+
+## To run the tests for all included packages:
+```pwsh
+go test -v ./...
+```
+
+## To test the package `gio_win`
+```pwsh
+go test -v ./gio_win
+```
+
+## To run tests and generate coverage profile
+```pwsh
+go test -coverprofile=coverage.out ./...
+```
