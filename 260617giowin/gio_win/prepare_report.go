@@ -28,7 +28,7 @@ func MakeListOfCompanies(list []string) map[string]Distribution {
 	return companyDist
 }
 
-var list_for_ppd_report []string = []string {
+var ppd_report_list []string = []string {
 	"ППД",
 	"Відпустка",
 	"Шпиталь",
@@ -38,8 +38,8 @@ var list_for_ppd_report []string = []string {
 }
 
 
-// list_of_companies - Впорядкований список підрозділів
-var list_of_companies []string = []string{
+// comp_list - Впорядкований список підрозділів
+var comp_list []string = []string{
 	"упр 3 бо",
 	"1",
 	"2",
@@ -74,8 +74,8 @@ func incrementRankCount(dist *Distribution, rank string) {
     dist.Total++
 }
 
-// categorizePersonnel adds person to appropriate list and updates counter
-func categorizePersonnel(
+// categorizePPD - adds person to appropriate list and updates counter
+func categorizePPD(
 	person ShortPersData,
 	list *[]ShortPersData,
 	counters map[string]Distribution,
@@ -98,7 +98,7 @@ func PrepareReportPPD(
 		[][]ShortPersData,
 		[]string,
 		) {
-	ppdReportCounter := make(map[string]Distribution, len(list_for_ppd_report))
+	ppdReportCounter := make(map[string]Distribution, len(ppd_report_list))
 	count_err := []string{}
 
 	ppd_list := []ShortPersData{}
@@ -107,7 +107,7 @@ func PrepareReportPPD(
 	szch_list := []ShortPersData{}
 	asmt_list := []ShortPersData{}
 
-	for _, key := range list_for_ppd_report {
+	for _, key := range ppd_report_list {
 			ppdReportCounter[key] = Distribution{}
 	}
 
@@ -118,21 +118,21 @@ func PrepareReportPPD(
 				Rank:       shpk_attr.Rank,
 		}
 
-		dist := ppdReportCounter[list_for_ppd_report[5]]
+		dist := ppdReportCounter[ppd_report_list[5]]
 		incrementRankCount(&dist, person.Rank)
-		ppdReportCounter[list_for_ppd_report[5]] = dist
+		ppdReportCounter[ppd_report_list[5]] = dist
 
 		if shpk_attr.Assignment == "ППД" {
-				categorizePersonnel(person, &ppd_list, ppdReportCounter,
-					list_for_ppd_report[0])
+				categorizePPD(person, &ppd_list, ppdReportCounter,
+					ppd_report_list[0])
 		} else if shpk_attr.Assignment != "" {
-				categorizePersonnel(person, &asmt_list, ppdReportCounter,
-					list_for_ppd_report[4])
+				categorizePPD(person, &asmt_list, ppdReportCounter,
+					ppd_report_list[4])
 		}
 
 		if shpk_attr.Vacation_now != "" && shpk_attr.Assignment == "" {
-				categorizePersonnel(person, &vac_list, ppdReportCounter,
-					list_for_ppd_report[1])
+				categorizePPD(person, &vac_list, ppdReportCounter,
+					ppd_report_list[1])
 		} else if shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -140,8 +140,8 @@ func PrepareReportPPD(
 		}
 
 		if shpk_attr.Hospital != "" && shpk_attr.Assignment == "" {
-				categorizePersonnel(person, &hosp_list, ppdReportCounter,
-					list_for_ppd_report[2])
+				categorizePPD(person, &hosp_list, ppdReportCounter,
+					ppd_report_list[2])
 		} else if shpk_attr.Hospital != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -149,8 +149,8 @@ func PrepareReportPPD(
 		}
 
 		if shpk_attr.Szch != "" && shpk_attr.Assignment == "" {
-				categorizePersonnel(person, &szch_list, ppdReportCounter,
-					list_for_ppd_report[3])
+				categorizePPD(person, &szch_list, ppdReportCounter,
+					ppd_report_list[3])
 		} else if shpk_attr.Szch != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: лікування чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -171,7 +171,7 @@ func PrepareReportPPD(
 func PrepareReportBO(shpk_data map[string]Person) (
 	map[string]Distribution, []string,
 	) {
-	boReportCounter := make(map[string]Distribution, len(list_for_ppd_report))
+	boReportCounter := make(map[string]Distribution, len(ppd_report_list))
 	count_err := []string{}
 
 	// manager_list := []ShortPersData{}	//0
@@ -185,7 +185,7 @@ func PrepareReportBO(shpk_data map[string]Person) (
 	// mo_list := []ShortPersData{}			//8
 	// total_list := []ShortPersData{}		//9
 
-	// for _, key := range list_of_companies {
+	// for _, key := range comp_list {
 	// 		boReportCounter[key] = Distribution{}
 	// }
 
@@ -196,9 +196,9 @@ func PrepareReportBO(shpk_data map[string]Person) (
 	// 			Rank:       shpk_attr.Rank,
 	// 	}
 
-	// 	dist := boReportCounter[list_for_ppd_report[5]]
+	// 	dist := boReportCounter[ppd_report_list[5]]
 	// 	incrementRankCount(&dist, shpk_attr.Rank)
-	// 	boReportCounter[list_for_ppd_report[5]] = dist
+	// 	boReportCounter[ppd_report_list[5]] = dist
 	// }
 
 

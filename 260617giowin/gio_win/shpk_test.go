@@ -63,14 +63,14 @@ func TestPrepareReportPPD(t *testing.T, ) {
     if err_msg != nil {
         fmt.Printf("Помилка створення звіту: %v\n", err)
     }
-    l := len(list_for_ppd_report)
+    l := len(ppd_report_list)
     fmt.Println("=== Report ===")
     fmt.Printf("Кількість людей в ШПС: %d\n", len(shpk))
 	for key, d := range counter {
 			fmt.Printf("%q: Offi=%d Serg=%d Sold=%d Total=%d\n",
 					key, d.Offi, d.Serg, d.Sold, d.Total)
 	}
-    fmt.Printf("Кількість людей після обробки: %d\n", counter[list_for_ppd_report[l-1]].Total)
+    fmt.Printf("Кількість людей після обробки: %d\n", counter[ppd_report_list[l-1]].Total)
     // fmt.Println(report)
 
 }
