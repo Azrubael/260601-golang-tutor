@@ -79,14 +79,14 @@ func categorizePersonnel(
 	person ShortPersData,
 	list *[]ShortPersData,
 	counters map[string]Distribution,
-	key, rank string,
+	key string,
 	) {
     if false {
         return
     }
     *list = append(*list, person)
     dist := counters[key]
-    incrementRankCount(&dist, rank)
+    incrementRankCount(&dist, person.Rank)
     counters[key] = dist
 }
 
@@ -119,20 +119,20 @@ func PrepareReportPPD(
 		}
 
 		dist := ppdReportCounter[list_for_ppd_report[5]]
-		incrementRankCount(&dist, shpk_attr.Rank)
+		incrementRankCount(&dist, person.Rank)
 		ppdReportCounter[list_for_ppd_report[5]] = dist
 
 		if shpk_attr.Assignment == "ППД" {
 				categorizePersonnel(person, &ppd_list, ppdReportCounter,
-					list_for_ppd_report[0], shpk_attr.Rank)
+					list_for_ppd_report[0])
 		} else if shpk_attr.Assignment != "" {
 				categorizePersonnel(person, &asmt_list, ppdReportCounter,
-					list_for_ppd_report[4], shpk_attr.Rank)
+					list_for_ppd_report[4])
 		}
 
 		if shpk_attr.Vacation_now != "" && shpk_attr.Assignment == "" {
 				categorizePersonnel(person, &vac_list, ppdReportCounter,
-					list_for_ppd_report[1], shpk_attr.Rank)
+					list_for_ppd_report[1])
 		} else if shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -141,7 +141,7 @@ func PrepareReportPPD(
 
 		if shpk_attr.Hospital != "" && shpk_attr.Assignment == "" {
 				categorizePersonnel(person, &hosp_list, ppdReportCounter,
-					list_for_ppd_report[2], shpk_attr.Rank)
+					list_for_ppd_report[2])
 		} else if shpk_attr.Hospital != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -150,7 +150,7 @@ func PrepareReportPPD(
 
 		if shpk_attr.Szch != "" && shpk_attr.Assignment == "" {
 				categorizePersonnel(person, &szch_list, ppdReportCounter,
-					list_for_ppd_report[3], shpk_attr.Rank)
+					list_for_ppd_report[3])
 		} else if shpk_attr.Szch != "" && shpk_attr.Assignment != "" {
 				err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: лікування чи відрядження?", name)
 				fmt.Println(err_msg)
@@ -168,18 +168,39 @@ func PrepareReportPPD(
 }
 
 // PrepareReportBO - Підготовка розгорнутого звіту по всьому підрозділу
-func PrepareReportBO(shpk_data map[string]Person) map[string]Distribution {
-	// compDistr := MakeListOfCompanies(list_of_companies)
-	// manager_dist := compDistr["упр 3 бо"]
-	// c1_dist := compDistr["1"]
-	// c2_dist := compDistr["2"]
-	// c3_dist := compDistr["3"]
-	// c4_dist := compDistr["4"]
-	// zv_dist := compDistr["від.зв./3 бо"]
-	// zab_dist := compDistr["від.заб./3 бо"]
-	// to_dist := compDistr["від.то/3 бо"]
-	// mp_dist := compDistr["м.п./3 бо"]
-	// total_dist := compDistr["підсумок"]
-	boReportCounter := make(map[string]Distribution, len(list_of_companies))
-	return boReportCounter
+func PrepareReportBO(shpk_data map[string]Person) (
+	map[string]Distribution, []string,
+	) {
+	boReportCounter := make(map[string]Distribution, len(list_for_ppd_report))
+	count_err := []string{}
+
+	// manager_list := []ShortPersData{}	//0
+	// c1_list := []ShortPersData{}			//1
+	// c2_list := []ShortPersData{}			//2
+	// c3_list := []ShortPersData{}			//3
+	// c4_list := []ShortPersData{}			//4
+	// vidZab_list := []ShortPersData{}	//5
+	// vidZv_list := []ShortPersData{}		//6
+	// vidTo_list := []ShortPersData{}		//7
+	// mo_list := []ShortPersData{}			//8
+	// total_list := []ShortPersData{}		//9
+
+	// for _, key := range list_of_companies {
+	// 		boReportCounter[key] = Distribution{}
+	// }
+
+	// for name, shpk_attr := range shpk_data {
+	// 	person := ShortPersData{
+	// 			Name:       name,
+	// 			Department: shpk_attr.Department,
+	// 			Rank:       shpk_attr.Rank,
+	// 	}
+
+	// 	dist := boReportCounter[list_for_ppd_report[5]]
+	// 	incrementRankCount(&dist, shpk_attr.Rank)
+	// 	boReportCounter[list_for_ppd_report[5]] = dist
+	// }
+
+
+	return boReportCounter, count_err
 }
