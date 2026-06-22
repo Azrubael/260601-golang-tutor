@@ -1,4 +1,4 @@
-The powershell command to test my localhost http server.
+## The powershell command to test my localhost http server.
 ```powershell
 Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:8080/" -TimeoutSec 5
 ```
@@ -10,9 +10,7 @@ PS D:\Project\gin_tutor1> netstat -ano | findstr LISTENING | findstr :8080
   TCP    [::]:8080              [::]:0                 LISTENING       30780
 ```
 
-
-
-
+# In another powershell
 ```powershell
 PS D:\Project\code\Go\az\gin_tutor1> Get-Content .\http_test.ps1
 try {
@@ -25,9 +23,9 @@ try {
 }
 ```
 
-### Let invoke the powershell script `http_test.ps1`:
+### Invoke the powershell script `http_test.ps1`:
 ```powershell
-PS D:\Project\code\Go\az\gin_tutor1> ./
+PS D:\Project\code\Go\az\gin_tutor1> ./http_test.ps1
 
 Security Warning: Script Execution Risk
 Invoke-WebRequest parses the content of the web page. Script code in the web page might be run when the page is parsed.
