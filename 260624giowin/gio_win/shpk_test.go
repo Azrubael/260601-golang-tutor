@@ -13,13 +13,6 @@ func TestReadShpkFile_BadPath(t *testing.T) {
     }
 }
 
-func TestReadShpkFile_Success(t *testing.T) {
-    _, err := ReadShpkFile("d:/tmp/ШПС-T0320.xlsx")
-    if err != nil {
-        t.Fatalf("Для тестування потрібен файл 'd:/tmp/ШПС-T0320_.xlsx', але його немає!")
-    }
-}
-
 // TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
@@ -60,7 +53,7 @@ func TestPrepareReportPPD(t *testing.T, ) {
     }
 
     counter, _, err_msg := PrepareReportPPD(shpk)
-    if err_msg != nil {
+    if len(err_msg) != 0 {
         fmt.Printf("Помилка створення звіту: %v\n", err)
     }
     l := len(ppd_report_list)
@@ -73,4 +66,19 @@ func TestPrepareReportPPD(t *testing.T, ) {
     fmt.Printf("Кількість людей після обробки: %d\n", counter[ppd_report_list[l-1]].Total)
     // fmt.Println(report)
 
+}
+
+func TestPrepareReportBO(t *testing.T, ) {
+	path := "d:/tmp/ШПС-T0320_.xlsx"
+	shpk, err := ReadShpkFile(path)
+	if err != nil {
+			t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
+	}
+	boReportCounter, err_count := PrepareReportBO(shpk)
+	if len(err_count) != 0 {
+			t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n", err)
+	}
+	for _, c := range comp_list {
+		fmt.Println(c, "\t", boReportCounter[c][bo_report_list[0]])
+	}
 }

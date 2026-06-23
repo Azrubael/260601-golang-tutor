@@ -17,6 +17,7 @@ type ShortPersData struct {
 	Name string
 	Department string
 	Rank string
+	Company string
 }
 
 // MakeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу
@@ -28,6 +29,7 @@ func MakeListOfCompanies(list []string) map[string]Distribution {
 	return companyDist
 }
 
+// ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
 var ppd_report_list []string = []string {
 	"ППД",
 	"Відпустка",
@@ -37,6 +39,18 @@ var ppd_report_list []string = []string {
 	"Загалом",
 }
 
+// bo_report_list - Перелік категорій, за якими ведеться розподіл особового складу по підрозділам всієї частини
+var bo_report_list []string = []string {
+	"Загалом",
+	"Відпустка",
+	"Шпиталь",
+	"Навчання",
+	"Відрядження",
+	"КСП",
+	"ВОП",
+	"СЗЧ",
+	"ППД",
+}
 
 // comp_list - Впорядкований список підрозділів
 var comp_list []string = []string{
@@ -116,6 +130,7 @@ func PrepareReportPPD(
 				Name:       name,
 				Department: shpk_attr.Department,
 				Rank:       shpk_attr.Rank,
+				Company:    shpk_attr.Company,
 		}
 
 		dist := ppdReportCounter[ppd_report_list[5]]
@@ -169,38 +184,41 @@ func PrepareReportPPD(
 
 // PrepareReportBO - Підготовка розгорнутого звіту по всьому підрозділу
 func PrepareReportBO(shpk_data map[string]Person) (
-	map[string]Distribution, []string,
-	) {
-	boReportCounter := make(map[string]Distribution, len(ppd_report_list))
+	map[string]map[string]Distribution, []string	) {
+
 	count_err := []string{}
+	boReportCounter := make(map[string]map[string]Distribution, len(comp_list))
 
-	// manager_list := []ShortPersData{}	//0
-	// c1_list := []ShortPersData{}			//1
-	// c2_list := []ShortPersData{}			//2
-	// c3_list := []ShortPersData{}			//3
-	// c4_list := []ShortPersData{}			//4
-	// vidZab_list := []ShortPersData{}	//5
-	// vidZv_list := []ShortPersData{}		//6
-	// vidTo_list := []ShortPersData{}		//7
-	// mo_list := []ShortPersData{}			//8
-	// total_list := []ShortPersData{}		//9
+	for _, c := range comp_list {
+		boReportCounter[c] = make(map[string]Distribution, len(bo_report_list))
+		for _, d := range bo_report_list {
+			boReportCounter[c][d] = Distribution{}
+			// fmt.Println(boReportCounter[c][d])
+		}
+	}
 
-	// for _, key := range comp_list {
-	// 		boReportCounter[key] = Distribution{}
-	// }
+	for name, shpk_attr := range shpk_data {
+		switch true {
+		case name == "" || name == " ":
+			err_msg := fmt.Sprintf(
+				"Відсутні дані стосовно імені для особи, що має звання %s в підрозділі %s",
+				shpk_attr.Rank, shpk_attr.Department)
+			fmt.Println(err_msg)
+			count_err = append(count_err, err_msg)
+		case shpk_attr.Rank == "":
+			err_msg := fmt.Sprintf("Для %s відсутні дані стосовно звання", name)
+			fmt.Println(err_msg)
+			count_err = append(count_err, err_msg)
+		case shpk_attr.Company == "":
+			err_msg := fmt.Sprintf("Для %s відсутні дані стосовно підрозділу", name)
+			fmt.Println(err_msg)
+			count_err = append(count_err, err_msg)
+		}
 
-	// for name, shpk_attr := range shpk_data {
-	// 	person := ShortPersData{
-	// 			Name:       name,
-	// 			Department: shpk_attr.Department,
-	// 			Rank:       shpk_attr.Rank,
-	// 	}
-
-	// 	dist := boReportCounter[ppd_report_list[5]]
-	// 	incrementRankCount(&dist, shpk_attr.Rank)
-	// 	boReportCounter[ppd_report_list[5]] = dist
-	// }
-
+		dist := boReportCounter[shpk_attr.Company][bo_report_list[0]]
+		incrementRankCount(&dist, shpk_attr.Rank)
+		boReportCounter[shpk_attr.Company][bo_report_list[0]] = dist
+	}
 
 	return boReportCounter, count_err
 }

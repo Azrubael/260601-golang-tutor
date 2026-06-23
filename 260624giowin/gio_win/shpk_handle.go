@@ -197,7 +197,6 @@ func ReadShpkFile(shpk_file string) (map[string]Person, error) {
 						Study:        ReadCellSafe(row, 25),
 						Szch:         ReadCellSafe(row, 26),
 						Vacation1:    ReadCellSafe(row, 29),
-						Telephone:    ReadCellSafe(row, 16),
 					}
 				}
 			}

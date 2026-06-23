@@ -1,12 +1,6 @@
 package gio_win
 
 func ExperimentBO(shpk_data map[string]Person) (map[string]map[string]Distribution, []string) {
-	type Distr struct {
-		Offi  int
-		Serg  int
-		Sold  int
-		Total int
-	}
 
 	type ReportData struct {
 		Name       string

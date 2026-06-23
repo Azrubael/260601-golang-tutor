@@ -1,43 +1,8 @@
 # Prepare the environment
 
 ```powershell
-mkdir myapp
-cd myapp
-go mod init main
-go get gioui.org@latest
+go mod init "github.com/Azrubael/260601-golang-tutor/260624giowin"
 go mod tidy
-```
-
-c:\Users\User\go\pkg\mod\
-https://pkg.go.dev/gioui.org/example
-https://jonegil.github.io/gui-with-gio/egg_timer/05_button_low_refactored.html
-
-
-
-Set GOSUMDB to a valid checksum database (or disable verification). Recommended: restore default GOSUMDB.
-
-Temporary for current PowerShell session:
-```powershell
-$env:GOSUMDB="sum.golang.org"
-go clean -modcache
-go mod tidy
-```
-
-Persist across sessions:
-```powershell
-setx GOSUMDB "sum.golang.org"
-```
-Close and reopen PowerShell after setx.
-
-If you must disable checksum verification (not recommended):
-```powershell
-$env:GOSUMDB="off"
-go mod tidy
-```
-
-Verify current settings:
-```powershell
-go env GOPROXY GOSUMDB GONOPROXY
 ```
 
 The right set of the environment variables on Windows 11
@@ -104,5 +69,5 @@ go test -v ./gio_win
 
 ## To run tests and generate coverage profile
 ```pwsh
-go test -coverprofile=coverage.out ./...
+go test -coverprofile=coverage.out -v ./gio_win
 ```
