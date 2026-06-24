@@ -71,3 +71,8 @@ go test -v ./gio_win
 ```pwsh
 go test -coverprofile=coverage.out -v ./gio_win
 ```
+
+## To run an exact test function `TestOpenFileXlsx` in the package `gio_win`
+```pwsh
+go test -run ^TestOpenFileXlsx$ -v ./gio_win
+```

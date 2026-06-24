@@ -112,3 +112,24 @@ func TestExperimentOpenXlsx(t *testing.T) {
 		fmt.Println("Користувач скасував вибір файлу *.xlsx за допомогою функції ExperimentOpenXlsx")
 	}
 }
+
+// TestExperimentBO - тестування функції ExperimentOpenXlsx в файлі tmp.go
+func TestOpenFileXlsx(t *testing.T) {
+    title := "Виберіть Excel файл"
+    filterPairs := []string{
+		"Excel files (*.xlsx)", "*.xlsx",
+		"All files (*.*)", "*.*",
+	}
+
+	xlsx_data, shpk_file_path, err_xlsx := OpenFileXlsx(title, filterPairs)
+	if err_xlsx != nil {
+		t.Fatalf("Помилка спроби відкриття фійлу %s за допомогою функції OpenFileXlsx: %v\n",
+        shpk_file_path, err_xlsx)
+	}
+
+	if xlsx_data != nil {
+		fmt.Printf("Успішно відкрито файл %s, кількість аркушів: %d\n", shpk_file_path, len(xlsx_data.GetSheetList()))
+	} else {
+		fmt.Println("Користувач скасував вибір файлу *.xlsx за допомогою функції ExperimentOpenXlsx")
+	}
+}
