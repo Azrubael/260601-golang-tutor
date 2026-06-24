@@ -1,5 +1,6 @@
 package gio_win
 
+// ExperimentBO - Експериментальна функція для створення структури звіту по підрозділах частини
 func ExperimentBO(shpk_data map[string]Person) (map[string]map[string]Distribution, []string) {
 
 	type ReportData struct {
