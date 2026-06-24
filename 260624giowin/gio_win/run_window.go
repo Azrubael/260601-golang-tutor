@@ -14,9 +14,11 @@ import (
 	"gioui.org/widget/material"
 )
 
+// C та D - скорочення для layout.Context та layout.Dimensions
 type C = layout.Context
 type D = layout.Dimensions
 
+// RunWindow - головна функція, яка запускає графічне вікно програми
 func RunWindow(window *app.Window) error {
 	var (
 		ops                               op.Ops
@@ -67,21 +69,21 @@ func RunWindow(window *app.Window) error {
 				open_action = false
 				open_file = false
 			}
-			// Menu bar
+			// Кнопки для вибору дій, які відображаються в головному вікні програми
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
 				Alignment: layout.Start}.Layout(gtx,
-				// Text above the button
+				// Текстовий заголовок для поля вводу імені файлу для звіту
 				layout.Rigid(func(gtx C) D {
 						lbl := material.Body1(theme, "Ім'я файлу для звіту:")
 						lbl.Alignment = text.Middle
 						return lbl.Layout(gtx)
 				}),
-				layout.Rigid( // The inputbox
+				layout.Rigid( // Поле вводу імені файлу для звіту
 					func(gtx C) D {
-						// Wrap the editor in material design
+						// Обгортка поля вводу в матеріальний дизайн
 						ed := material.Editor(theme, input_window, text_in_window)
 
-						// Define characteristics of the input box
+						// Визначення характеристик поля вводу
 						input_window.SingleLine = true
 						input_window.Alignment = text.Middle
 
@@ -125,7 +127,7 @@ func RunWindow(window *app.Window) error {
 				}),
 			)
 
-			// Simple dropdowns under the menu bar
+			// Відображення кнопок для вибору дій, якщо прапорець відповідної кнопки кореневого меню задіяний
 			if open_file {
 				layout.Inset{
 					Top:   unit.Dp(100),
@@ -201,7 +203,7 @@ func RunWindow(window *app.Window) error {
 					)
 				})
 			} else {
-			// Center-alligned text in the main window
+			// Вивід заголовку програми, вирівняного по центру вікна
 			title := material.H6(theme, "Генератор звітів")
 			title.Alignment = text.Middle
 
@@ -215,6 +217,7 @@ func RunWindow(window *app.Window) error {
 	}
 }
 
+// renderMenuButton - Функція для відображення кнопки меню з можливістю вибору
 func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 	name string, current *bool /*, handler func()*/, others ...*bool) D {
 	margins := layout.Inset{
@@ -231,7 +234,7 @@ func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 				for _, o := range others {
 						*o = false
 				}
-				// handler() // call the function passed in
+				// handler() // виклик переданої функції для обробки натискання кнопки
 			}
 			return d
 		},

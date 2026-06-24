@@ -3,6 +3,8 @@ package gio_win
 import (
 	"fmt"
 	"testing"
+
+	"github.com/xuri/excelize/v2"
 )
 
 
@@ -84,5 +86,29 @@ func TestPrepareReportBO(t *testing.T, ) {
 		for _, c := range comp_list {
 			fmt.Println(c, "\t", boReportCounter[c][bo_report_list[i]])
 		}
+	}
+}
+
+// TestExperimentBO - тестування функції ExperimentOpenXlsx в файлі tmp.go
+func TestExperimentOpenXlsx(t *testing.T) {
+    title := "Виберіть Excel файл"
+    filterPairs := []string{
+		"Excel files (*.xlsx)", "*.xlsx",
+		"All files (*.*)", "*.*",
+	}
+
+	xlsx_file, err_xlsx := ExperimentOpenXlsx(title, filterPairs)
+	if err_xlsx != nil {
+		t.Fatalf("Помилка спроби відкриття фійлу *.xlsx за допомогою функції ExperimentOpenXlsx: %v\n", err_xlsx)
+	}
+
+	if xlsx_file != "" {
+		xlsx_data, err_shpk := excelize.OpenFile(xlsx_file)
+		if err_shpk != nil {
+			t.Fatalf("Помилка відкриття %s: %v", xlsx_file, err_shpk)
+		}
+		fmt.Printf("Успішно відкрито файл %s, кількість аркушів: %d\n", xlsx_file, len(xlsx_data.GetSheetList()))
+	} else {
+		fmt.Println("Користувач скасував вибір файлу *.xlsx за допомогою функції ExperimentOpenXlsx")
 	}
 }

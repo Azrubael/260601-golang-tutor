@@ -136,7 +136,7 @@ func ReadShpkFile(shpk_file string) (map[string]Person, error) {
 		return shpk_data, err_shpk
 	}
 
-	// Отрмання таблиці даних ШПС у вигляді рядків
+	// Отримання таблиці даних ШПС у вигляді рядків
 	shpk_rows, err_shpk := shpk_xlsx.GetRows("ШПС")
 	if err_shpk != nil {
 		log.Printf("Помилка зчитування змісту %s: %v", shpk_file, err_shpk)
