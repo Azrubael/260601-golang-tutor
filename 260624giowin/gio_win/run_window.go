@@ -35,6 +35,10 @@ func RunWindow(window *app.Window) error {
 		write_vacation_btn                = new(widget.Clickable)
 
 		input_window                      = new(widget.Editor)
+		// SHPK_XLSX *excelize.File
+		// SHPK_FILE_PATH string
+		// BO_XLSX *excelize.File
+		// BO_FILE_PATH string
 		open_file, open_action, open_help bool
 		define_shpk, define_distrib bool
 		prepare_shpk, prepare_ppd, refresh_distrib, write_vacation bool
@@ -105,7 +109,6 @@ func RunWindow(window *app.Window) error {
 							Width:        unit.Dp(2),
 						}
 
-						// ... before laying it out, one inside the other
 						return margins.Layout(gtx,
 							func(gtx C) D {
 								return border.Layout(gtx, ed.Layout)
@@ -138,10 +141,14 @@ func RunWindow(window *app.Window) error {
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, shpk_btn, "Визначити ШПК",
 								&define_shpk, &define_distrib)
+								/*
+								SHPK_XLSX, SHPK_FILE_PATH, err := OpenFileXlsx()
+								*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, proto_distrib_btn, "Визначити прототип розподілу",
 								&define_distrib, &define_shpk)
+								/*OpenFileXlsx*/
 							}),
 					)
 				})
@@ -155,20 +162,24 @@ func RunWindow(window *app.Window) error {
 				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, prep_shpk_btn, "Підготувати дані",
+							return renderMenuButton(gtx, theme, prep_shpk_btn, "Підготувати дані ШПК",
 								&prepare_shpk, &prepare_ppd, &refresh_distrib, &write_vacation)
+								/*ReadShpkData*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, prep_ppd_btn, "Записати звіт для стройової",
 								&prepare_ppd, &prepare_shpk, &refresh_distrib, &write_vacation)
+								/*SaveReportPPD*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, refresh_distrib_btn, "Оновити весь розподіл",
 								&refresh_distrib, &prepare_ppd, &prepare_shpk, &write_vacation)
+								/*UpdateDistributionBO*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, write_vacation_btn, "Записати звіт по І відпустці",
 								&write_vacation, &prepare_ppd, &prepare_shpk, &refresh_distrib)
+								/*SaveVacationReport1()*/
 							}),
 					)
 				})
@@ -218,8 +229,9 @@ func RunWindow(window *app.Window) error {
 }
 
 // renderMenuButton - Функція для відображення кнопки меню з можливістю вибору
-func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
-	name string, current *bool /*, handler func()*/, others ...*bool) D {
+func renderMenuButton(
+	gtx C, theme *material.Theme, btn *widget.Clickable, name string,
+	/* handler func()*/ current_flag *bool , other_flags ...*bool) D {
 	margins := layout.Inset{
 		Top:    unit.Dp(5),
 		Bottom: unit.Dp(0),
@@ -230,8 +242,8 @@ func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 	return margins.Layout(gtx,
 		func(gtx C) D {
 			if btn.Clicked(gtx) {
-				*current = !*current
-				for _, o := range others {
+				*current_flag = !*current_flag
+				for _, o := range other_flags {
 						*o = false
 				}
 				// handler() // виклик переданої функції для обробки натискання кнопки

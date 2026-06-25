@@ -26,17 +26,6 @@ type Person struct {
 	Telephone    string // Телефон
 }
 
-// OpenFileXlsx - Відкриття діалогового вікна для вибору файлу Excel
-func OpenFileXlsx(title string, filterPairs []string) (
-	shpk_xlsx *excelize.File, shpk_file_path string, err_shpk error,
-	) {
-	// filterPairs: [ "Text files (*.txt)", "*.txt", "All files (*.*)", "*.*" ]
-
-	const (
-		OFN_FILEMUSTEXIST = 0x00001000
-		OFN_PATHMUSTEXIST = 0x00000800
-		MAX_PATH          = 260
-	)
 	type openFileNameW struct {
 		lStructSize       uint32
 		hwndOwner         uintptr
@@ -59,6 +48,44 @@ func OpenFileXlsx(title string, filterPairs []string) (
 		lpfnHook          uintptr
 		lpTemplateName   *uint16
 	}
+
+// LoadExcelFile - Завантаження Excel файлу
+func LoadExcelFile(filePath string) (*excelize.File, error) {
+		xlsx, err_shpk := excelize.OpenFile(filePath)
+	if err_shpk != nil {
+		log.Printf("Помилка відкриття %s: %v", filePath, err_shpk)
+		return nil, err_shpk
+	}
+	return xlsx, nil
+}
+
+// OpenFileXlsx - Відкриття діалогового вікна для вибору файлу Excel
+func OpenFileXlsx(title string, filePath string) (
+	*excelize.File, string, error,
+	) {
+	filterPairs := []string{
+		"Excel files (*.xlsx)", "*.xlsx",
+		"All files (*.*)", "*.*",
+	}
+
+	if filePath != "" {
+		shpk_xlsx, err_shpk := LoadExcelFile(filePath)
+		if err_shpk != nil {
+			return shpk_xlsx, filePath, err_shpk
+		}
+		return shpk_xlsx, filePath, nil
+	}
+
+	const (
+		OFN_FILEMUSTEXIST = 0x00001000
+		OFN_PATHMUSTEXIST = 0x00000800
+		MAX_PATH          = 260
+	)
+	var (
+		shpk_xlsx *excelize.File
+		shpk_file_path string
+		err_shpk   error
+	)
 
 	modComdlg32 := windows.NewLazySystemDLL("comdlg32.dll")
 	procGetOpenFileNameW := modComdlg32.NewProc("GetOpenFileNameW")
@@ -99,15 +126,15 @@ func OpenFileXlsx(title string, filterPairs []string) (
 		nFilterIndex: 1,
 	}
 
-	ret, _, callErr := procGetOpenFileNameW.Call(uintptr(unsafe.Pointer(&ofn)))
+	ret, _, err_call := procGetOpenFileNameW.Call(uintptr(unsafe.Pointer(&ofn)))
 	if ret == 0 {
 		// скасовано
-		if callErr == windows.ERROR_SUCCESS {
+		if err_call == windows.ERROR_SUCCESS {
 			return shpk_xlsx, "", nil
 		}
 		// помилка
-		if callErr != nil && callErr != windows.ERROR_SUCCESS {
-			return shpk_xlsx, "", callErr
+		if err_call != nil && err_call != windows.ERROR_SUCCESS {
+			return shpk_xlsx, "", err_call
 		}
 		return shpk_xlsx, "", nil
 	}
@@ -120,9 +147,8 @@ func OpenFileXlsx(title string, filterPairs []string) (
 	shpk_file_path = syscall.UTF16ToString(fileBuf[:n])
 
 	// Відкриття файлу з ШПС в форматі Excel
-	shpk_xlsx, err_shpk = excelize.OpenFile(shpk_file_path)
+	shpk_xlsx, err_shpk = LoadExcelFile(shpk_file_path)
 	if err_shpk != nil {
-		log.Printf("Помилка відкриття %s: %v", shpk_file_path, err_shpk)
 		return shpk_xlsx, shpk_file_path, err_shpk
 	}
 	return shpk_xlsx, shpk_file_path, nil
@@ -229,18 +255,14 @@ func getCompanyForManagement(division string) (string, error) {
 	return "", fmt.Errorf("Не можу отримати номер роти по запису підрозділу: %s", division)
 }
 
-// ReadShpkFile - Читання даних з ШПС в структуру даних для персоналу
-func ReadShpkFile(shpk_file_path string) (map[string]Person, error) {
+// ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
+func ReadShpkData(shpk_file_path string) (map[string]Person, error) {
 
 	shpk_data := make(map[string]Person)
 	title := "Виберіть Excel файл"
-	filterPairs := []string{
-		"Excel files (*.xlsx)", "*.xlsx",
-		"All files (*.*)", "*.*",
-	}
 
 	// Відкриття файлу з ШПС в форматі Excel
-	shpk_xlsx, shpk_file_path, err_shpk := OpenFileXlsx(title, filterPairs)
+	shpk_xlsx, shpk_file_path, err_shpk := OpenFileXlsx(title, shpk_file_path)
 	if err_shpk != nil {
 		log.Printf("Помилка відкриття %s: %v", shpk_file_path, err_shpk)
 		return shpk_data, err_shpk

@@ -9,7 +9,7 @@ import (
 
 
 func TestReadShpkFile_BadPath(t *testing.T) {
-    _, err := ReadShpkFile("d:/tmp/not-exist.xlsx")
+    _, err := ReadShpkData("d:/tmp/not-exist.xlsx")
     if err == nil {
         t.Fatalf("Очікувана помилка читання файлу, якого немає, але насправді він є!")
     }
@@ -18,7 +18,7 @@ func TestReadShpkFile_BadPath(t *testing.T) {
 // TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
-    shpk, err := ReadShpkFile(path)
+    shpk, err := ReadShpkData(path)
     if err != nil {
         t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
     }
@@ -49,7 +49,7 @@ func TestReadShpkFile(t *testing.T) {
 
 func TestPrepareReportPPD(t *testing.T, ) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
-    shpk, err := ReadShpkFile(path)
+    shpk, err := ReadShpkData(path)
     if err != nil {
         t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
     }
@@ -71,10 +71,10 @@ func TestPrepareReportPPD(t *testing.T, ) {
 }
 
 func TestPrepareReportBO(t *testing.T, ) {
-	path := "d:/tmp/ШПС-T0320_.xlsx"
-	shpk, err := ReadShpkFile(path)
+	default_path := "d:/tmp/ШПС-T0320_.xlsx"
+	shpk, err := ReadShpkData(default_path)
 	if err != nil {
-			t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", path, err)
+			t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", default_path, err)
 	}
 	boReportCounter, err_count := PrepareReportBO(shpk)
 	if len(err_count) != 0 {
@@ -116,12 +116,8 @@ func TestExperimentOpenXlsx(t *testing.T) {
 // TestExperimentBO - тестування функції ExperimentOpenXlsx в файлі tmp.go
 func TestOpenFileXlsx(t *testing.T) {
     title := "Виберіть Excel файл"
-    filterPairs := []string{
-		"Excel files (*.xlsx)", "*.xlsx",
-		"All files (*.*)", "*.*",
-	}
 
-	xlsx_data, shpk_file_path, err_xlsx := OpenFileXlsx(title, filterPairs)
+	xlsx_data, shpk_file_path, err_xlsx := OpenFileXlsx(title, "d:/tmp/ШПС-T0320.xlsx")
 	if err_xlsx != nil {
 		t.Fatalf("Помилка спроби відкриття фійлу %s за допомогою функції OpenFileXlsx: %v\n",
         shpk_file_path, err_xlsx)
