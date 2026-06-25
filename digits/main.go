@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var bigDigits = [][]string{{
@@ -98,15 +99,16 @@ func main() {
 
 	stringOfDigits := os.Args[1]
 	for row := range bigDigits[0] {
-		line := ""
+		var line strings.Builder
 		for column := range stringOfDigits {
 			digit := stringOfDigits[column] - '0'
 			if 0 < digit && digit <= 9 {
-				line += bigDigits[digit][row] + "  "
+				line.WriteString(bigDigits[digit][row])
+				line.WriteString("  ")
 			} else {
 				log.Fatal("Invalid whole number")
 			}
 		}
-		fmt.Println(line)
+		fmt.Println(line.String())
 	}
 }
