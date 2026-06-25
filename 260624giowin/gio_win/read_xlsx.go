@@ -12,43 +12,6 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-type Person struct {
-	Department   string // Підрозділ
-	Platoon      string // Взвод
-	Company      string // Рота
-	Rank         string // Звання
-	Assignment   string // Відрядження
-	Hospital     string // Шпиталь
-	Vacation_now string // Поточна відпустка
-	Study        string // Навчання
-	Szch         string // СЗЧ
-	Vacation1    string // Чи був у І частині щорічної відпустки
-	Telephone    string // Телефон
-}
-
-	type openFileNameW struct {
-		lStructSize       uint32
-		hwndOwner         uintptr
-		hInstance         uintptr
-		lpstrFilter       *uint16
-		lpstrCustomFilter *uint16
-		nMaxCustFilter    uint32
-		nFilterIndex      uint32
-		lpstrFile         *uint16
-		nMaxFile          uint32
-		lpstrFileTitle    *uint16
-		nMaxFileTitle    uint32
-		lpstrInitialDir   *uint16
-		lpstrTitle        *uint16
-		Flags             uint32
-		nFileOffset       uint16
-		nFileExtension    uint16
-		lpstrDefExt       *uint16
-		lCustData         uintptr
-		lpfnHook          uintptr
-		lpTemplateName   *uint16
-	}
-
 // LoadExcelFile - Завантаження Excel файлу
 func LoadExcelFile(filePath string) (*excelize.File, error) {
 		xlsx, err_shpk := excelize.OpenFile(filePath)

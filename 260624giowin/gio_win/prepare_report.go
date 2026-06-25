@@ -5,21 +5,6 @@ import (
 	"strings"
 )
 
-
-type Distribution struct {
-	Offi int
-	Serg int
-	Sold int
-	Total int
-}
-
-type ShortPersData struct {
-	Name string
-	Department string
-	Rank string
-	Company string
-}
-
 // MakeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу
 func MakeListOfCompanies(list []string) map[string]Distribution {
 	companyDist := make(map[string]Distribution, len(list))
@@ -29,42 +14,6 @@ func MakeListOfCompanies(list []string) map[string]Distribution {
 	return companyDist
 }
 
-// ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
-var ppd_report_list []string = []string {
-	"ППД",
-	"Відпустка",
-	"Шпиталь",
-	"СЗЧ",
-	"Відрядження",
-	"Загалом",
-}
-
-// bo_report_list - Перелік категорій, за якими ведеться розподіл особового складу по підрозділам всієї частини
-var bo_report_list []string = []string {
-	"Загалом",
-	"Відпустка",
-	"Шпиталь",
-	"Навчання",
-	"Відрядження",
-	"КСП",
-	"ВОП",
-	"СЗЧ",
-	"ППД",
-}
-
-// comp_list - Впорядкований список підрозділів
-var comp_list []string = []string{
-	"упр 3 бо",
-	"1",
-	"2",
-	"3",
-	"4",
-	"від.зв./3 бо",
-	"від.заб./3 бо",
-	"від.то/3 бо",
-	"м.п./3 бо",
-	"підсумок",
-}
 
 // incrementRankCount - increments the appropriate rank counter in Distribution
 func incrementRankCount(dist *Distribution, rank string) {

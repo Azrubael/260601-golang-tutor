@@ -14,41 +14,33 @@ import (
 	"gioui.org/widget/material"
 )
 
-// C та D - скорочення для layout.Context та layout.Dimensions
-type C = layout.Context
-type D = layout.Dimensions
-
 // RunWindow - головна функція, яка запускає графічне вікно програми
 func RunWindow(window *app.Window) error {
 	var (
 		ops                               op.Ops
-		file_btn                          = new(widget.Clickable)
-		action_btn                        = new(widget.Clickable)
-		help_btn                          = new(widget.Clickable)
-
-		shpk_btn                          = new(widget.Clickable)
-		proto_distrib_btn                 = new(widget.Clickable)
-
-		prep_shpk_btn                     = new(widget.Clickable)
-		prep_ppd_btn                      = new(widget.Clickable)
-		refresh_distrib_btn               = new(widget.Clickable)
-		write_vacation_btn                = new(widget.Clickable)
-
 		input_window                      = new(widget.Editor)
 		// SHPK_XLSX *excelize.File
 		// SHPK_FILE_PATH string
 		// BO_XLSX *excelize.File
 		// BO_FILE_PATH string
-		open_file, open_action, open_help bool
-		define_shpk, define_distrib bool
-		prepare_shpk, prepare_ppd, refresh_distrib, write_vacation bool
-
+		BS BtnState
 		w_width               = 480
 		w_height              = 640
 		text_in_window string = "d:\\tmp\\filename.xlsx"
 	)
 
 	theme := material.NewTheme()
+	BS.file_btn                          = new(widget.Clickable)
+	BS.action_btn                        = new(widget.Clickable)
+	BS.help_btn                          = new(widget.Clickable)
+
+	BS.shpk_btn                          = new(widget.Clickable)
+	BS.proto_distrib_btn                 = new(widget.Clickable)
+
+	BS.prep_shpk_btn                     = new(widget.Clickable)
+	BS.prep_ppd_btn                      = new(widget.Clickable)
+	BS.refresh_distrib_btn               = new(widget.Clickable)
+	BS.save_vacation_btn                 = new(widget.Clickable)
 
 	window.Option(app.Title("XLSX processing app"))
 	window.Option(app.Size(unit.Dp(w_width), unit.Dp(w_height)))
@@ -59,20 +51,8 @@ func RunWindow(window *app.Window) error {
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			if file_btn.Clicked(gtx) {
-				open_file = !open_file
-				open_action = false
-				open_help = false
-				text_in_window = input_window.Text()
-			} else if action_btn.Clicked(gtx) {
-				open_action = !open_action
-				open_file = false
-				open_help = false
-			} else if help_btn.Clicked(gtx) {
-				open_help = !open_help
-				open_action = false
-				open_file = false
-			}
+			BS, text_in_window = handleButtonClicks(gtx, input_window, text_in_window, BS)
+
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
 				Alignment: layout.Start}.Layout(gtx,
@@ -117,21 +97,21 @@ func RunWindow(window *app.Window) error {
 					},
 				),
 				layout.Rigid(func(gtx C) D {
-					return renderMenuButton(gtx, theme, file_btn, "Файл",
-						&open_file, &open_action, &open_help)
+					return renderMenuButton(gtx, theme, BS.file_btn, "Файл",
+						BS.open_file, BS.open_action, BS.open_help)
 				}),
 				layout.Rigid(func(gtx C) D {
-					return renderMenuButton(gtx, theme, action_btn, "Звіти",
-						&open_action, &open_file, &open_help)
+					return renderMenuButton(gtx, theme, BS.action_btn, "Звіти",
+						BS.open_action, BS.open_file, BS.open_help)
 				}),
 				layout.Rigid(func(gtx C) D {
-					return renderMenuButton(gtx, theme, help_btn, "Допомога",
-						&open_help, &open_file, &open_action)
+					return renderMenuButton(gtx, theme, BS.help_btn, "Допомога",
+						BS.open_help, BS.open_file, BS.open_action)
 				}),
 			)
 
 			// Відображення кнопок для вибору дій, якщо прапорець відповідної кнопки кореневого меню задіяний
-			if open_file {
+			if BS.open_file {
 				layout.Inset{
 					Top:   unit.Dp(100),
 					Left:  unit.Dp(25),
@@ -139,22 +119,22 @@ func RunWindow(window *app.Window) error {
 				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, shpk_btn, "Визначити ШПК",
-								&define_shpk, &define_distrib)
+							return renderMenuButton(gtx, theme, BS.shpk_btn, "Визначити ШПК",
+								BS.define_shpk, BS.define_distrib)
 								/*
 								SHPK_XLSX, SHPK_FILE_PATH, err := OpenFileXlsx()
 								*/
 							}),
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, proto_distrib_btn, "Визначити прототип розподілу",
-								&define_distrib, &define_shpk)
-								/*OpenFileXlsx*/
+							return renderMenuButton(gtx, theme, BS.proto_distrib_btn, "Визначити прототип розподілу",
+								BS.define_distrib, BS.define_shpk)
+								/*OpenFileXlsx()*/
 							}),
 					)
 				})
 
 			}
-			if open_action {
+			if BS.open_action {
 				layout.Inset{
 					Top:   unit.Dp(100),
 					Left:  unit.Dp(25),
@@ -162,29 +142,33 @@ func RunWindow(window *app.Window) error {
 				}.Layout(gtx, func(gtx C) D {
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, prep_shpk_btn, "Підготувати дані ШПК",
-								&prepare_shpk, &prepare_ppd, &refresh_distrib, &write_vacation)
-								/*ReadShpkData*/
+							return renderMenuButton(gtx, theme, BS.prep_shpk_btn,
+								"Підготувати дані ШПК",
+								BS.prepare_shpk, BS.prepare_ppd, BS.refresh_distrib, BS.save_vacation)
+								/*ReadShpkData()*/
 							}),
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, prep_ppd_btn, "Записати звіт для стройової",
-								&prepare_ppd, &prepare_shpk, &refresh_distrib, &write_vacation)
-								/*SaveReportPPD*/
+							return renderMenuButton(gtx, theme, BS.prep_ppd_btn,
+								"Записати звіт для стройової",
+								BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib, BS.save_vacation)
+								/*SaveReportPPD()*/
 							}),
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, refresh_distrib_btn, "Оновити весь розподіл",
-								&refresh_distrib, &prepare_ppd, &prepare_shpk, &write_vacation)
-								/*UpdateDistributionBO*/
+							return renderMenuButton(gtx, theme, BS.refresh_distrib_btn,
+								"Оновити весь розподіл",
+								BS.refresh_distrib, BS.prepare_ppd, BS.prepare_shpk, BS.save_vacation)
+								/*UpdateDistributionBO()*/
 							}),
 						layout.Rigid(func(gtx C) D {
-							return renderMenuButton(gtx, theme, write_vacation_btn, "Записати звіт по І відпустці",
-								&write_vacation, &prepare_ppd, &prepare_shpk, &refresh_distrib)
+							return renderMenuButton(gtx, theme, BS.save_vacation_btn,
+								"Записати звіт по І відпустці",
+								BS.save_vacation, BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib)
 								/*SaveVacationReport1()*/
 							}),
 					)
 				})
 			}
-			if open_help {
+			if BS.open_help {
 				layout.Inset{
 					Top:   unit.Dp(25),
 					Left:  unit.Dp(25),
@@ -228,10 +212,61 @@ func RunWindow(window *app.Window) error {
 	}
 }
 
+// handleButtonClicks - Функція для обробки натискань кнопок меню
+func handleButtonClicks(
+	gtx C,
+	input_window *widget.Editor,
+	text_in_window string,
+	BS BtnState,
+	) (BtnState, string) {
+	switch {
+	case BS.file_btn.Clicked(gtx):
+		BS.open_file = !BS.open_file
+		BS.open_action = false
+		BS.open_help = false
+		text_in_window = input_window.Text()
+	case BS.action_btn.Clicked(gtx):
+		BS.open_action = !BS.open_action
+		BS.open_file = false
+		BS.open_help = false
+	case BS.help_btn.Clicked(gtx):
+		BS.open_help = !BS.open_help
+		BS.open_action = false
+		BS.open_file = false
+	case BS.shpk_btn.Clicked(gtx):
+		BS.define_shpk = !BS.define_shpk
+		BS.define_distrib = false
+	case BS.proto_distrib_btn.Clicked(gtx):
+		BS.define_distrib = !BS.define_distrib
+		BS.define_shpk = false
+	case BS.prep_shpk_btn.Clicked(gtx):
+		BS.prepare_shpk = !BS.prepare_shpk
+		BS.prepare_ppd = false
+		BS.refresh_distrib = false
+		BS.save_vacation = false
+	case BS.prep_ppd_btn.Clicked(gtx):
+		BS.prepare_ppd = !BS.prepare_ppd
+		BS.prepare_shpk = false
+		BS.refresh_distrib = false
+		BS.save_vacation = false
+	case BS.refresh_distrib_btn.Clicked(gtx):
+		BS.refresh_distrib = !BS.refresh_distrib
+		BS.prepare_shpk = false
+		BS.prepare_ppd = false
+		BS.save_vacation = false
+	case BS.save_vacation_btn.Clicked(gtx):
+		BS.save_vacation = !BS.save_vacation
+		BS.prepare_shpk = false
+		BS.prepare_ppd = false
+		BS.refresh_distrib = false
+	}
+	return BS, text_in_window
+}
+
 // renderMenuButton - Функція для відображення кнопки меню з можливістю вибору
 func renderMenuButton(
 	gtx C, theme *material.Theme, btn *widget.Clickable, name string,
-	/* handler func()*/ current_flag *bool , other_flags ...*bool) D {
+	/* handler func() */ current_flag bool , other_flags ...bool) D {
 	margins := layout.Inset{
 		Top:    unit.Dp(5),
 		Bottom: unit.Dp(0),
@@ -242,9 +277,9 @@ func renderMenuButton(
 	return margins.Layout(gtx,
 		func(gtx C) D {
 			if btn.Clicked(gtx) {
-				*current_flag = !*current_flag
-				for _, o := range other_flags {
-						*o = false
+				current_flag = !current_flag
+				for f := range other_flags {
+						other_flags[f] = false
 				}
 				// handler() // виклик переданої функції для обробки натискання кнопки
 			}

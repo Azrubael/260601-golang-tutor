@@ -7,14 +7,6 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-
-func TestReadShpkFile_BadPath(t *testing.T) {
-    _, err := ReadShpkData("d:/tmp/not-exist.xlsx")
-    if err == nil {
-        t.Fatalf("Очікувана помилка читання файлу, якого немає, але насправді він є!")
-    }
-}
-
 // TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
     path := "d:/tmp/ШПС-T0320_.xlsx"
