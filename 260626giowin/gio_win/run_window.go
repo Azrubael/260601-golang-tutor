@@ -19,11 +19,10 @@ func RunWindow(window *app.Window) error {
 	var (
 		ops                               op.Ops
 		input_window                      = new(widget.Editor)
-		// SHPK_XLSX, BO_XLSX xlsxData
 		BS BtnState
+		text_in_window string = "d:\\tmp\\filename.xlsx"
 		w_width               = 480
 		w_height              = 640
-		text_in_window string = "d:\\tmp\\filename.xlsx"
 	)
 
 	theme := material.NewTheme()
@@ -48,7 +47,8 @@ func RunWindow(window *app.Window) error {
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			text_in_window = BS.handleButtonClicks(gtx, input_window, text_in_window)
+			text_in_window = BS.handleButtonClicks(gtx,	SHPK_XLSX, BO_XLSX,
+				input_window, text_in_window)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
@@ -212,6 +212,7 @@ func RunWindow(window *app.Window) error {
 // handleButtonClicks - Функція для обробки натискань кнопок меню
 func (BS BtnState) handleButtonClicks(
 	gtx C,
+	SHPK_XLSX, BO_XLSX xlsxData,
 	input_window *widget.Editor,
 	text_in_window string,
 	) (string) {
@@ -232,9 +233,21 @@ func (BS BtnState) handleButtonClicks(
 	case BS.shpk_btn.Clicked(gtx):
 		BS.define_shpk = !BS.define_shpk
 		BS.define_distrib = false
+		title1 := "Виберіть Excel файл ШПК"
+		err_shpk := error(nil)
+		SHPK_XLSX, err_shpk = OpenFileXlsx(title1, "")
+		if err_shpk != nil {
+			fmt.Printf("Помилка відкриття %s: %v", SHPK_XLSX.FilePath, err_shpk)
+		}
 	case BS.proto_distrib_btn.Clicked(gtx):
 		BS.define_distrib = !BS.define_distrib
 		BS.define_shpk = false
+		title2 := "Виберіть Excel файл загального розподілу людей"
+		err_bo := error(nil)
+		BO_XLSX, err_bo = OpenFileXlsx(title2, "")
+		if err_bo != nil {
+			fmt.Printf("Помилка відкриття %s: %v", BO_XLSX.FilePath, err_bo)
+		}
 	case BS.prep_shpk_btn.Clicked(gtx):
 		BS.prepare_shpk = !BS.prepare_shpk
 		BS.prepare_ppd = false

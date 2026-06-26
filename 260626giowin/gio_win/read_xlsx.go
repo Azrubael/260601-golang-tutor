@@ -23,20 +23,19 @@ func LoadExcelFile(filePath string) (*excelize.File, error) {
 }
 
 // OpenFileXlsx - Відкриття діалогового вікна для вибору файлу Excel
-func OpenFileXlsx(title string, filePath string) (
-	*excelize.File, string, error,
-	) {
+func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 	filterPairs := []string{
 		"Excel files (*.xlsx)", "*.xlsx",
 		"All files (*.*)", "*.*",
 	}
 
 	if filePath != "" {
-		shpk_xlsx, err_shpk := LoadExcelFile(filePath)
-		if err_shpk != nil {
-			return shpk_xlsx, filePath, err_shpk
+		xlsx.Data, err = LoadExcelFile(filePath)
+		xlsx.FilePath = filePath
+		if err != nil {
+			return xlsx, err
 		}
-		return shpk_xlsx, filePath, nil
+		return xlsx, nil
 	}
 
 	const (
@@ -44,11 +43,11 @@ func OpenFileXlsx(title string, filePath string) (
 		OFN_PATHMUSTEXIST = 0x00000800
 		MAX_PATH          = 260
 	)
-	var (
-		shpk_xlsx *excelize.File
-		shpk_file_path string
-		err_shpk   error
-	)
+	// var (
+	// 	shpk_xlsx *excelize.File
+	// 	shpk_file_path string
+	// 	err_shpk   error
+	// )
 
 	modComdlg32 := windows.NewLazySystemDLL("comdlg32.dll")
 	procGetOpenFileNameW := modComdlg32.NewProc("GetOpenFileNameW")
@@ -58,14 +57,14 @@ func OpenFileXlsx(title string, filePath string) (
 	for i := 0; i+1 < len(filterPairs); i += 2 {
 		a, err := windows.UTF16FromString(filterPairs[i])
 		if err != nil {
-			return shpk_xlsx, "", err
+			return xlsx, err
 		}
 		filters16 = append(filters16, a...)
 		filters16 = append(filters16, 0)
 
 		b, err := windows.UTF16FromString(filterPairs[i+1])
 		if err != nil {
-			return shpk_xlsx, "", err
+			return xlsx, err
 		}
 		filters16 = append(filters16, b...)
 		filters16 = append(filters16, 0)
@@ -74,7 +73,7 @@ func OpenFileXlsx(title string, filePath string) (
 
 	title16, err := windows.UTF16FromString(title)
 	if err != nil {
-		return shpk_xlsx, "", err
+		return xlsx, err
 	}
 
 	fileBuf := make([]uint16, MAX_PATH)
@@ -93,13 +92,13 @@ func OpenFileXlsx(title string, filePath string) (
 	if ret == 0 {
 		// скасовано
 		if err_call == windows.ERROR_SUCCESS {
-			return shpk_xlsx, "", nil
+			return xlsx, nil
 		}
 		// помилка
 		if err_call != nil && err_call != windows.ERROR_SUCCESS {
-			return shpk_xlsx, "", err_call
+			return xlsx, err_call
 		}
-		return shpk_xlsx, "", nil
+		return xlsx, nil
 	}
 	// перетворюємо UTF-16 до Go рядка (до першого 0)
 	n := 0
@@ -107,14 +106,14 @@ func OpenFileXlsx(title string, filePath string) (
 		n++
 	}
 	// Повертаємо шлях до обраного файлу
-	shpk_file_path = syscall.UTF16ToString(fileBuf[:n])
+	xlsx.FilePath = syscall.UTF16ToString(fileBuf[:n])
 
 	// Відкриття файлу з ШПС в форматі Excel
-	shpk_xlsx, err_shpk = LoadExcelFile(shpk_file_path)
-	if err_shpk != nil {
-		return shpk_xlsx, shpk_file_path, err_shpk
+	xlsx.Data, err = LoadExcelFile(xlsx.FilePath)
+	if err != nil {
+		return xlsx, err
 	}
-	return shpk_xlsx, shpk_file_path, nil
+	return xlsx, nil
 }
 
 // ReadCellSafe - Безпечне отримання значення ячейки, з перевіркою чи вона існує
@@ -219,22 +218,14 @@ func getCompanyForManagement(division string) (string, error) {
 }
 
 // ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
-func ReadShpkData(shpk_file_path string) (map[string]Person, error) {
+func ReadShpkData(shpk xlsxData) (map[string]Person, error) {
 
 	shpk_data := make(map[string]Person)
-	title := "Виберіть Excel файл"
-
-	// Відкриття файлу з ШПС в форматі Excel
-	shpk_xlsx, shpk_file_path, err_shpk := OpenFileXlsx(title, shpk_file_path)
-	if err_shpk != nil {
-		log.Printf("Помилка відкриття %s: %v", shpk_file_path, err_shpk)
-		return shpk_data, err_shpk
-	}
 
 	// Отримання таблиці даних ШПС у вигляді рядків
-	shpk_rows, err_shpk := shpk_xlsx.GetRows("ШПС")
+	shpk_rows, err_shpk := shpk.Data.GetRows("ШПС")
 	if err_shpk != nil {
-		log.Printf("Помилка зчитування змісту %s: %v", shpk_file_path, err_shpk)
+		log.Printf("Помилка зчитування змісту %s: %v", shpk.FilePath, err_shpk)
 	}
 
 	// Заповнення структури даних персоналу змістом, пропускаючи заголовки ШПС

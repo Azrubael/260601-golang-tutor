@@ -3,7 +3,7 @@ package gio_win
 import (
 	"gioui.org/layout"
 	"gioui.org/widget"
-	// "github.com/xuri/excelize/v2"
+	"github.com/xuri/excelize/v2"
 )
 
 // C та D - скорочення для layout.Context та layout.Dimensions
@@ -75,10 +75,12 @@ type openFileNameW struct {
 	lpTemplateName   *uint16
 }
 
-// type xlsxData struct {
-// 	Data *excelize.File
-// 	FileFath string
-// }
+type xlsxData struct {
+	Data *excelize.File
+	FilePath string
+}
+
+var SHPK_XLSX, BO_XLSX xlsxData
 
 // ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
 var ppd_report_list []string = []string {
