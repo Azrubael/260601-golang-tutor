@@ -19,10 +19,6 @@ func RunWindow(window *app.Window) error {
 	var (
 		ops                               op.Ops
 		input_window                      = new(widget.Editor)
-		// SHPK_XLSX *excelize.File
-		// SHPK_FILE_PATH string
-		// BO_XLSX *excelize.File
-		// BO_FILE_PATH string
 		BS BtnState
 		w_width               = 480
 		w_height              = 640

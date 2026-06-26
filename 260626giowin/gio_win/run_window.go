@@ -233,20 +233,24 @@ func (BS BtnState) handleButtonClicks(
 	case BS.shpk_btn.Clicked(gtx):
 		BS.define_shpk = !BS.define_shpk
 		BS.define_distrib = false
-		title1 := "Виберіть Excel файл ШПК"
+		title_shpk := "Виберіть Excel файл ШПК"
 		err_shpk := error(nil)
-		SHPK_XLSX, err_shpk = OpenFileXlsx(title1, "")
+		SHPK_XLSX, err_shpk = OpenFileXlsx(title_shpk, "")
 		if err_shpk != nil {
 			fmt.Printf("Помилка відкриття %s: %v", SHPK_XLSX.FilePath, err_shpk)
+		} else {
+			fmt.Printf("Файл %s успішно відкрито", SHPK_XLSX.FilePath)
 		}
 	case BS.proto_distrib_btn.Clicked(gtx):
 		BS.define_distrib = !BS.define_distrib
 		BS.define_shpk = false
-		title2 := "Виберіть Excel файл загального розподілу людей"
+		title_bo := "Виберіть Excel файл загального розподілу людей"
 		err_bo := error(nil)
-		BO_XLSX, err_bo = OpenFileXlsx(title2, "")
+		BO_XLSX, err_bo = OpenFileXlsx(title_bo, "")
 		if err_bo != nil {
 			fmt.Printf("Помилка відкриття %s: %v", BO_XLSX.FilePath, err_bo)
+		} else {
+			fmt.Printf("Файл %s успішно відкрито", BO_XLSX.FilePath)
 		}
 	case BS.prep_shpk_btn.Clicked(gtx):
 		BS.prepare_shpk = !BS.prepare_shpk
@@ -258,16 +262,19 @@ func (BS BtnState) handleButtonClicks(
 		BS.prepare_shpk = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
+		SaveReportPPD()
 	case BS.refresh_distrib_btn.Clicked(gtx):
 		BS.refresh_distrib = !BS.refresh_distrib
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false
 		BS.save_vacation = false
+		UpdateDistributionBO()
 	case BS.save_vacation_btn.Clicked(gtx):
 		BS.save_vacation = !BS.save_vacation
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false
 		BS.refresh_distrib = false
+		SaveVacationReport1()
 	}
 	return text_in_window
 }

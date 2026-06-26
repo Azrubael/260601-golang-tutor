@@ -7,19 +7,19 @@ import (
 	"testing"
 )
 
-// TestOpenShpkFile - тестування функції ReadShpkFile
-func TestOpenShpkFile(t *testing.T) {
-	filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpk, err := OpenFileXlsx("Тестовий текст TestOpenShpkFile", filepath)
-	if err != nil {
-		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
-	} else {
-		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
-	}
+// TestOpenShpkFile - тестування функції OpenShpkFile
+// func TestOpenShpkFile(t *testing.T) {
+// 	filepath := ""
+// 	shpk, err := OpenFileXlsx("Тестовий текст TestOpenShpkFile", filepath)
+// 	if err != nil {
+// 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
+// 	} else {
+// 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
+// 	}
 
-}
+// }
 
-// TestOpenShpkFile - тестування функції ReadShpkFile
+// TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
@@ -57,6 +57,7 @@ func TestReadShpkFile(t *testing.T) {
 	}
 }
 
+// TestPrepareReportPPD - тестування функції PrepareReportPPD
 func TestPrepareReportPPD(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
@@ -86,6 +87,7 @@ func TestPrepareReportPPD(t *testing.T) {
 
 }
 
+// TestPrepareReportBO - тестування функції PrepareReportBO
 func TestPrepareReportBO(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
@@ -111,19 +113,3 @@ func TestPrepareReportBO(t *testing.T) {
 	}
 }
 
-// TestExperimentBO - тестування функції ExperimentOpenXlsx в файлі tmp.go
-func TestOpenFileXlsx(t *testing.T) {
-	title := "Виберіть Excel файл"
-
-	shpk, err_xlsx := OpenFileXlsx(title, "d:/tmp/ШПС-T0320.xlsx")
-	if err_xlsx != nil {
-		t.Fatalf("Помилка спроби відкриття фійлу %s за допомогою функції OpenFileXlsx: %v\n",
-			shpk.FilePath, err_xlsx)
-	}
-
-	if shpk.Data != nil {
-		fmt.Printf("Успішно відкрито файл %s, кількість аркушів: %d\n", shpk.FilePath, len(shpk.Data.GetSheetList()))
-	} else {
-		fmt.Println("Користувач скасував вибір файлу *.xlsx за допомогою функції ExperimentOpenXlsx")
-	}
-}
