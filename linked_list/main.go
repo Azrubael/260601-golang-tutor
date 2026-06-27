@@ -5,58 +5,17 @@ import (
 	"slices"
 )
 
-type node struct{
-	data int
-	next *node
-}
+func main() {
 
-type linkedList struct{
-	head *node
-	length int
-}
+	// Testing intLinkedList methods
+	///////////////////////////////////////////////////////////////////
+	mylist := intLinkedList{}
+	intArray := []int{37, 73, 70, 324, 43, 18}
 
-func (l *linkedList) prepend (n *node) {
-	second := l.head
-	l.head = n
-	l.head.next = second
-	l.length++
-}
-
-func (l linkedList) printListData(){
-	toPrint := l.head
-	for l.length != 0 {
-		fmt.Printf("%d ", toPrint.data)
-		toPrint = toPrint.next
-		l.length--
-	}
-	fmt.Println()
-}
-
-func (l *linkedList) deleteWithValue(value int) {
-	if l.length == 0 {
-		return
-	}
-	if l.head.data == value {
-		l.head = l.head.next
-		l.length--
-		return
-	}
-	previousToDelete := l.head
-	for previousToDelete.next.data != value {
-		previousToDelete = previousToDelete.next
-	}
-	previousToDelete.next = previousToDelete.next.next
-	l.length--
-}
-
-func main(){
-	mylist := linkedList{}
-	myArray := []int{37, 73, 70, 324, 43, 18}
-
-	for _, element := range myArray {
+	for _, element := range intArray {
 		value := &node{data: element}
 		mylist.prepend(value)
-}
+	}
 	fmt.Print(mylist, "\n\n")
 
 	fmt.Println("The created linked list:")
@@ -64,13 +23,69 @@ func main(){
 
 	valToDel := 37
 	message := ""
-	if slices.Contains(myArray, valToDel) {
-			mylist.deleteWithValue(valToDel)
-			message = fmt.Sprintf("The value %d has been deleted from myArray.", valToDel)
+	if slices.Contains(intArray, valToDel) {
+		mylist.deleteWithValue(valToDel)
+		message = fmt.Sprintf("The value %d has been deleted from myArray.", valToDel)
 	} else {
 		message = fmt.Sprintf("The value %d was not found in myArray.", valToDel)
 	}
-
 	fmt.Println(message)
 	mylist.printListData()
+
+	// Insert an element at the end of the list.
+	newNode1 := &node{data: 77}
+	mylist.postpend(newNode1)
+	mylist.printListData()
+
+	// Insert an element before a given node address
+	newNode2 := &node{data: 55}
+	address := mylist.head.next
+	mylist.insertBefore(newNode2, address)
+	mylist.printListData()
+
+	// Testing the deleteWithValue method
+	valToDel = 77
+	message = ""
+	if slices.Contains(intArray, valToDel) {
+		mylist.deleteWithValue(valToDel)
+		message = fmt.Sprintf("The value %d has been deleted from myArray.", valToDel)
+	} else {
+		message = fmt.Sprintf("The value %d was not found in myArray.", valToDel)
+	}
+	fmt.Println(message)
+	mylist.printListData()
+
+	// Testing genericLinkedList methods
+	///////////////////////////////////////////////////////////////////
+	floatLList := genericLinkedList[float32]{start: nil, length: 0}
+  floatArray := []float32{37.73, 73.0, 70.5, 324.99, 43.11, 18.001}
+
+  for _, el := range floatArray {
+		floatLList.genericPrepend(el)
+	}
+
+  fmt.Println("The created linked list:")
+  floatLList.genericPrint()
+  
+  fmt.Println("The updated linked list:")
+  floatLList.genericPostpend(19.19)
+  floatLList.genericPrint()
+
+  stringLList := genericLinkedList[string]{start: nil, length: 0}
+  stringArray := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
+
+  for _, el := range stringArray {
+		stringLList.genericPrepend(el)
+	}
+
+  fmt.Println("The created linked list:")
+  stringLList.genericPrint()
+  
+  fmt.Println("The updated linked list:")
+  stringLList.genericPostpend("eleven")
+  stringLList.genericPrint()
+
+  stringLList.genericDeleteNode("one")
+  fmt.Println("The linked list after deletion:")
+  stringLList.genericPrint()
 }
