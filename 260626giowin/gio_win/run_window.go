@@ -47,7 +47,7 @@ func RunWindow(window *app.Window) error {
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			text_in_window = BS.handleButtonClicks(gtx,	SHPK_XLSX, BO_XLSX,
+			BS, text_in_window = handleButtonClicks(gtx, BS, SHPK_XLSX, BO_XLSX,
 				input_window, text_in_window)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
@@ -210,12 +210,13 @@ func RunWindow(window *app.Window) error {
 }
 
 // handleButtonClicks - Функція для обробки натискань кнопок меню
-func (BS BtnState) handleButtonClicks(
+func handleButtonClicks(
 	gtx C,
+	BS BtnState,
 	SHPK_XLSX, BO_XLSX xlsxData,
 	input_window *widget.Editor,
 	text_in_window string,
-	) (string) {
+	) (BtnState, string) {
 	switch {
 	case BS.file_btn.Clicked(gtx):
 		BS.open_file = !BS.open_file
@@ -276,7 +277,7 @@ func (BS BtnState) handleButtonClicks(
 		BS.refresh_distrib = false
 		SaveVacationReport1()
 	}
-	return text_in_window
+	return BS, text_in_window
 }
 
 // renderMenuButton - Функція для відображення кнопки меню з можливістю вибору
