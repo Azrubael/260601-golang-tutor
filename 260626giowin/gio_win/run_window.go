@@ -2,6 +2,7 @@ package gio_win
 
 import (
 	"fmt"
+	"log"
 
 	"image/color"
 
@@ -15,7 +16,8 @@ import (
 )
 
 // RunWindow - головна функція, яка запускає графічне вікно програми
-func RunWindow(window *app.Window) error {
+func RunWindow(
+	window *app.Window, logger *log.Logger) error {
 	var (
 		ops                               op.Ops
 		input_window                      = new(widget.Editor)
@@ -48,7 +50,7 @@ func RunWindow(window *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
 			BS, text_in_window = handleButtonClicks(gtx, BS, SHPK_XLSX, BO_XLSX,
-				input_window, text_in_window)
+				input_window, text_in_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
@@ -216,21 +218,30 @@ func handleButtonClicks(
 	SHPK_XLSX, BO_XLSX xlsxData,
 	input_window *widget.Editor,
 	text_in_window string,
+	logger *log.Logger,
 	) (BtnState, string) {
+
 	switch {
+
 	case BS.file_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Файл'")
 		BS.open_file = !BS.open_file
 		BS.open_action = false
 		BS.open_help = false
 		text_in_window = input_window.Text()
+
 	case BS.action_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Звіти'")
 		BS.open_action = !BS.open_action
 		BS.open_file = false
 		BS.open_help = false
+
 	case BS.help_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Допомога'")
 		BS.open_help = !BS.open_help
 		BS.open_action = false
 		BS.open_file = false
+
 	case BS.shpk_btn.Clicked(gtx):
 		BS.define_shpk = !BS.define_shpk
 		BS.define_distrib = false
@@ -242,6 +253,7 @@ func handleButtonClicks(
 		} else {
 			fmt.Printf("Файл %s успішно відкрито", SHPK_XLSX.FilePath)
 		}
+
 	case BS.proto_distrib_btn.Clicked(gtx):
 		BS.define_distrib = !BS.define_distrib
 		BS.define_shpk = false
