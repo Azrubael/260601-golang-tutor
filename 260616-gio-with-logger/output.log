@@ -1,0 +1,7 @@
+APP_LOG: 2026/06/27 10:44:54 simple_win.go:33: Starting app. Logs are also visible in the terminal.
+APP_LOG: 2026/06/27 10:49:02 simple_win.go:33: Starting app. Logs are also visible in the terminal.
+APP_LOG: 2026/06/27 10:49:04 simple_win.go:70: Clicked: File
+APP_LOG: 2026/06/27 10:49:06 simple_win.go:72: Clicked: Action
+APP_LOG: 2026/06/27 10:49:07 simple_win.go:77: Clicked: Help
+APP_LOG: 2026/06/27 10:49:07 simple_win.go:72: Clicked: Action
+APP_LOG: 2026/06/27 10:49:08 simple_win.go:70: Clicked: File
