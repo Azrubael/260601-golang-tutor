@@ -11,9 +11,9 @@ func main() {
 	go func() {
 		w := new(app.Window)
 
-		err := window(w)
-		if err != nil {
-			log.Fatal(err)
+		if err := window(w); err != nil {
+			log.SetOutput(os.Stderr)
+			log.Printf("window error: %v\n", err)
 		}
 		os.Exit(0)
 	}()

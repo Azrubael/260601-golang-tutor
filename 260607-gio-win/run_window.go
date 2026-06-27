@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -32,7 +34,8 @@ func window(w *app.Window) error {
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart, Alignment: layout.Start}.Layout(gtx,
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					d := material.Button(theme, fileBtn, "File").Layout(gtx)
-					if actionBtn.Clicked(gtx) {
+					if fileBtn.Clicked(gtx) {
+						fmt.Println("Clicked: File")
 						fileOpen = !fileOpen
 						actionOpen = false
 						helpOpen = false
@@ -42,6 +45,7 @@ func window(w *app.Window) error {
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					d := material.Button(theme, actionBtn, "Action").Layout(gtx)
 					if actionBtn.Clicked(gtx) {
+						fmt.Println("Clicked: Action")
 						actionOpen = !actionOpen
 						fileOpen = false
 						helpOpen = false
@@ -51,6 +55,7 @@ func window(w *app.Window) error {
 				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					d := material.Button(theme, helpBtn, "Help").Layout(gtx)
 					if helpBtn.Clicked(gtx) {
+						fmt.Println("Clicked: Help")
 						helpOpen = !helpOpen
 						fileOpen = false
 						actionOpen = false
