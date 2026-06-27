@@ -1,4 +1,4 @@
-package az_linked_lists
+package azll
 
 import (
 	"fmt"

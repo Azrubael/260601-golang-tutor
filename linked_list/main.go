@@ -9,11 +9,11 @@ func main() {
 
 	// Testing intLinkedList methods
 	///////////////////////////////////////////////////////////////////
-	mylist := intLinkedList{}
+	mylist := azll.intLinkedList{}
 	intArray := []int{37, 73, 70, 324, 43, 18}
 
 	for _, element := range intArray {
-		value := &node{data: element}
+		value := &azll.node{data: element}
 		mylist.prepend(value)
 	}
 	fmt.Print(mylist, "\n\n")
@@ -33,12 +33,12 @@ func main() {
 	mylist.printListData()
 
 	// Insert an element at the end of the list.
-	newNode1 := &node{data: 77}
+	newNode1 := &azll.node{data: 77}
 	mylist.postpend(newNode1)
 	mylist.printListData()
 
 	// Insert an element before a given node address
-	newNode2 := &node{data: 55}
+	newNode2 := &azll.node{data: 55}
 	address := mylist.head.next
 	mylist.insertBefore(newNode2, address)
 	mylist.printListData()
@@ -57,7 +57,7 @@ func main() {
 
 	// Testing genericLinkedList methods
 	///////////////////////////////////////////////////////////////////
-	floatLList := genericLinkedList[float32]{start: nil, length: 0}
+	floatLList := azll.genericLinkedList[float32]{start: nil, length: 0}
   floatArray := []float32{37.73, 73.0, 70.5, 324.99, 43.11, 18.001}
 
   for _, el := range floatArray {
@@ -66,12 +66,12 @@ func main() {
 
   fmt.Println("The created linked list:")
   floatLList.genericPrint()
-  
+
   fmt.Println("The updated linked list:")
   floatLList.genericPostpend(19.19)
   floatLList.genericPrint()
 
-  stringLList := genericLinkedList[string]{start: nil, length: 0}
+  stringLList := azll.genericLinkedList[string]{start: nil, length: 0}
   stringArray := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
 
   for _, el := range stringArray {
@@ -80,7 +80,7 @@ func main() {
 
   fmt.Println("The created linked list:")
   stringLList.genericPrint()
-  
+
   fmt.Println("The updated linked list:")
   stringLList.genericPostpend("eleven")
   stringLList.genericPrint()
