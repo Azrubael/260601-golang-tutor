@@ -1,6 +1,7 @@
 # filtered
 
 go.sum
+go_output.log
 az_env
 azwenv
 workflow

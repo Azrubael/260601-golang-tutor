@@ -243,6 +243,7 @@ func handleButtonClicks(
 		BS.open_file = false
 
 	case BS.shpk_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Визначити ШПК'")
 		BS.define_shpk = !BS.define_shpk
 		BS.define_distrib = false
 		title_shpk := "Виберіть Excel файл ШПК"
@@ -255,6 +256,7 @@ func handleButtonClicks(
 		}
 
 	case BS.proto_distrib_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Визначити прототип розподілу'")
 		BS.define_distrib = !BS.define_distrib
 		BS.define_shpk = false
 		title_bo := "Виберіть Excel файл загального розподілу людей"
@@ -266,23 +268,30 @@ func handleButtonClicks(
 			fmt.Printf("Файл %s успішно відкрито", BO_XLSX.FilePath)
 		}
 	case BS.prep_shpk_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Підготувати дані ШПК'")
 		BS.prepare_shpk = !BS.prepare_shpk
 		BS.prepare_ppd = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
+
 	case BS.prep_ppd_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Записати звіт для стройової'")
 		BS.prepare_ppd = !BS.prepare_ppd
 		BS.prepare_shpk = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
 		SaveReportPPD()
+
 	case BS.refresh_distrib_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Оновити весь розподіл'")
 		BS.refresh_distrib = !BS.refresh_distrib
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false
 		BS.save_vacation = false
 		UpdateDistributionBO()
+
 	case BS.save_vacation_btn.Clicked(gtx):
+		logger.Println("Натиснуто кнопку: 'Записати звіт по І відпустці'")
 		BS.save_vacation = !BS.save_vacation
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false

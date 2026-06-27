@@ -17,7 +17,7 @@ var logFile *os.File
 func main() {
 	var err error
 	// Відкрити чи створити логфайл
-	logFile, err = os.OpenFile("output.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err = os.OpenFile("go_output.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("Error opening log file:", err)
 		return
