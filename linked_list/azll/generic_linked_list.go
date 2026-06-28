@@ -22,6 +22,9 @@ func (l *GenericLinkedList[T]) GenericPrint() {
 	temp := l.Start
 	for temp != nil {
 		fmt.Print(temp.Data, " ")
+		if temp.Next == nil {
+			break
+		}
 		temp = temp.Next
 	}
 	fmt.Println()
@@ -35,9 +38,10 @@ func (l *GenericLinkedList[T]) GenericPrepend(data T) {
 	}
 	if l.Start == nil { // If the linked list is empty
 		l.Start = &n
+		l.Length++
 		return
 	}
-	if l.Start.Next == nil { // If it`s` the last node of the linked list
+	if l.Start.Next == nil { // If it`s the last node of the linked list
 		l.Start.Next = &n
 		return
 	}
@@ -45,6 +49,7 @@ func (l *GenericLinkedList[T]) GenericPrepend(data T) {
 	l.Start = l.Start.Next
 	l.GenericPrepend(data)
 	l.Start = temp
+	l.Length++
 }
 
 // Add data to the end of the generic linked list
@@ -72,22 +77,26 @@ func (l *GenericLinkedList[T]) GenericDeleteNode(value T) error {
 
 	// Delete the first node
 	if IfEqualAny(l.Start.Data, value) {
-		l.Start = l.Start.Next
-		l.Length--
 		if l.Length == 0 {
 			l.Start = nil
 		}
+		l.Start = l.Start.Next
+		l.Length--
 		return nil
 	}
 
 	prev := l.Start
-	for prev.Next != nil || !IfEqualAny(prev.Next.Data, value) {
-		prev.Next = prev.Next.Next
-		return nil
+	for !IfEqualAny(prev.Next.Data, value) {
+		prev = prev.Next
+		// return nil
 	}
-	prev = prev.Next
+	if prev.Next != nil {
+		prev.Next = prev.Next.Next
+	} else {
+		return fmt.Errorf("The value %v was not found in the linked list", value)
+	}
 	l.Length--
-	return fmt.Errorf("The value %v was not found in the linked list", value)
+	return nil
 }
 
 func IfEqualAny[T any](a, b T) bool {

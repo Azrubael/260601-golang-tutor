@@ -9,8 +9,8 @@ import (
 
 func main() {
 
-	// Testing intLinkedList methods
-	///////////////////////////////////////////////////////////////////
+	//////////   Testing intLinkedList methods   ///////////
+	fmt.Print("Testing intLinkedList methods\n")
 	mylist := azll.IntLinkedList{}
 	intArray := []int{37, 73, 70, 324, 43, 18}
 
@@ -20,7 +20,7 @@ func main() {
 	}
 	fmt.Print(mylist, "\n\n")
 
-	fmt.Println("The created linked list:")
+	fmt.Println("The _first_ created linked list:")
 	mylist.PrintListData()
 
 	valToDel := 37
@@ -57,8 +57,8 @@ func main() {
 	fmt.Println(message)
 	mylist.PrintListData()
 
-	// Testing genericLinkedList methods
-	///////////////////////////////////////////////////////////////////
+	///////////  Testing genericLinkedList methods  //////////
+	fmt.Print("\nTesting genericLinkedList methods\n")
 	floatLList := azll.GenericLinkedList[float32]{Start: nil, Length: 0}
   floatArray := []float32{37.73, 73.0, 70.5, 324.99, 43.11, 18.001}
 
@@ -66,10 +66,10 @@ func main() {
 		floatLList.GenericPrepend(el)
 	}
 
-  fmt.Println("The created linked list:")
+  fmt.Println("The _second_ created linked list:")
   floatLList.GenericPrint()
 
-  fmt.Println("The updated linked list:")
+  fmt.Println("The updated _second_ linked list:")
   floatLList.GenericPostpend(19.19)
   floatLList.GenericPrint()
 
@@ -80,14 +80,17 @@ func main() {
 		stringLList.GenericPrepend(el)
 	}
 
-  fmt.Println("The created linked list:")
+  fmt.Println("The _third_ created linked list:")
   stringLList.GenericPrint()
 
-  fmt.Println("The updated linked list:")
+  fmt.Println("The updated _third_ linked list:")
   stringLList.GenericPostpend("eleven")
   stringLList.GenericPrint()
 
-  stringLList.GenericDeleteNode("one")
+  err := stringLList.GenericDeleteNode("eleven")
+	if err != nil {
+		fmt.Println(err)
+	}
   fmt.Println("The linked list after deletion:")
   stringLList.GenericPrint()
 }
