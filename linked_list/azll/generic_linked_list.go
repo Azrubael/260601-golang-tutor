@@ -6,87 +6,87 @@ import (
 )
 
 // Generic node
-type genericNode[T any] struct {
+type GenericNode[T any] struct {
 	Data T
-	next *genericNode[T]
+	Next *GenericNode[T]
 }
 
 // Generic linked list
-type genericLinkedList[T any] struct {
-	start  *genericNode[T]
-	length int
+type GenericLinkedList[T any] struct {
+	Start  *GenericNode[T]
+	Length int
 }
 
 // Print into the generic linked list
-func (l *genericLinkedList[T]) genericPrint() {
-	temp := l.start
+func (l *GenericLinkedList[T]) GenericPrint() {
+	temp := l.Start
 	for temp != nil {
 		fmt.Print(temp.Data, " ")
-		temp = temp.next
+		temp = temp.Next
 	}
 	fmt.Println()
 }
 
 // Add data to the beginning of the generic linked list
-func (l *genericLinkedList[T]) genericPrepend(data T) {
-	n := genericNode[T]{
+func (l *GenericLinkedList[T]) GenericPrepend(data T) {
+	n := GenericNode[T]{
 		Data: data,
-		next: nil,
+		Next: nil,
 	}
-	if l.start == nil { // If the linked list is empty
-		l.start = &n
+	if l.Start == nil { // If the linked list is empty
+		l.Start = &n
 		return
 	}
-	if l.start.next == nil { // If it`s` the last node of the linked list
-		l.start.next = &n
+	if l.Start.Next == nil { // If it`s` the last node of the linked list
+		l.Start.Next = &n
 		return
 	}
-	temp := l.start
-	l.start = l.start.next
-	l.genericPrepend(data)
-	l.start = temp
+	temp := l.Start
+	l.Start = l.Start.Next
+	l.GenericPrepend(data)
+	l.Start = temp
 }
 
 // Add data to the end of the generic linked list
-func (l *genericLinkedList[T]) genericPostpend(data T) {
-	n := genericNode[T]{
+func (l *GenericLinkedList[T]) GenericPostpend(data T) {
+	n := GenericNode[T]{
 		Data: data,
-		next: nil,
+		Next: nil,
 	}
-	if l.start == nil {
-		l.start = &n
+	if l.Start == nil {
+		l.Start = &n
 		return
 	}
-	temp := l.start
-	for temp.next != nil {
-		temp = temp.next
+	temp := l.Start
+	for temp.Next != nil {
+		temp = temp.Next
 	}
-	temp.next = &n
+	temp.Next = &n
 }
 
 // Delete data from the generic linked list
-func (l *genericLinkedList[T]) genericDeleteNode(value T) error {
-	if l.length == 0 {
+func (l *GenericLinkedList[T]) GenericDeleteNode(value T) error {
+	if l.Length == 0 {
 		return fmt.Errorf("The linked list is empty")
 	}
 
 	// Delete the first node
-	if IfEqualAny(l.start.Data, value) {
-		l.start = l.start.next
-		l.length--
-		if l.length == 0 {
-			l.start = nil
+	if IfEqualAny(l.Start.Data, value) {
+		l.Start = l.Start.Next
+		l.Length--
+		if l.Length == 0 {
+			l.Start = nil
 		}
 		return nil
 	}
 
-	prev := l.start
-	for prev.next != nil || !IfEqualAny(prev.next.Data, value) {
-		prev.next = prev.next.next
+	prev := l.Start
+	for prev.Next != nil || !IfEqualAny(prev.Next.Data, value) {
+		prev.Next = prev.Next.Next
 		return nil
 	}
-	prev = prev.next
-	l.length--
+	prev = prev.Next
+	l.Length--
 	return fmt.Errorf("The value %v was not found in the linked list", value)
 }
 
