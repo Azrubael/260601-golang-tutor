@@ -5,87 +5,87 @@ import (
 )
 
 // The node of a linked list for integers.
-type node struct{
-	data int
-	next *node
+type IntNode struct{
+	Data int
+	Next *IntNode
 }
 
 // The linked list itself.
-type intLinkedList struct{
-	head *node
+type IntLinkedList struct{
+	Head *IntNode
 	length int
 }
 
 // Prepending into the begin of a linked list.
-func (l *intLinkedList) prepend(n *node) {
-	second := l.head
-	l.head = n
-	l.head.next = second
+func (l *IntLinkedList) Prepend(n *IntNode) {
+	second := l.Head
+	l.Head = n
+	l.Head.Next = second
 	l.length++
 }
 
 // Appending into the end of a linked list.
-func (l *intLinkedList) postpend(n *node) {
-	current := l.head
+func (l *IntLinkedList) Postpend(n *IntNode) {
+	current := l.Head
 	if current == nil {
-		l.head = n
+		l.Head = n
 	} else {
-		for current.next != nil {
-			current = current.next
+		for current.Next != nil {
+			current = current.Next
 		}
-		current.next = n
+		current.Next = n
 	}
 	l.length++
 }
 
 // This method takes a pointer to a node (n) and a pointer to the node address before which the new node should be inserted (address).
-func (l *intLinkedList) insertBefore(n *node, address *node) {
+func (l *IntLinkedList) InsertBefore(n *IntNode, address *IntNode) {
 	if address == nil {
 		return
 	}
-	newNode := &node{data: n.data}
-	if address == l.head {
-		newNode.next = l.head
-		l.head = newNode
+	newNode := &IntNode{Data: n.Data}
+	if address == l.Head {
+		newNode.Next = l.Head
+		l.Head = newNode
 	} else {
-		current := l.head
-		for current != nil && current.next != address {
-			current = current.next
+		current := l.Head
+		for current != nil && current.Next != address {
+			current = current.Next
 		}
 		if current != nil {
-			newNode.next = address
-			current.next = newNode
+			newNode.Next = address
+			current.Next = newNode
 		}
 	}
 	l.length++
 }
 
 // The method for printing out.
-func (l intLinkedList) printListData(){
-	toPrint := l.head
+func (l IntLinkedList) PrintListData(){
+	toPrint := l.Head
 	for l.length != 0 {
-		fmt.Printf("%d ", toPrint.data)
-		toPrint = toPrint.next
+		fmt.Printf("%d ", toPrint.Data)
+		toPrint = toPrint.Next
 		l.length--
 	}
 	fmt.Println()
 }
 
 // The method to delete a node with its value.
-func (l *intLinkedList) deleteWithValue(value int) {
+func (l *IntLinkedList) DeleteWithValue(value int) {
 	if l.length == 0 {
 		return
 	}
-	if l.head.data == value {
-		l.head = l.head.next
+	if l.Head.Data == value {
+		l.Head = l.Head.Next
 		l.length--
-		if l.length == 0 { l.head = nil }
+		if l.length == 0 { l.Head = nil }
 		return
 	}
-	previousToDelete := l.head
-	for previousToDelete.next.data != value {
-		previousToDelete = previousToDelete.next
+	previousToDelete := l.Head
+	for previousToDelete.Next.Data != value {
+		previousToDelete = previousToDelete.Next
 	}
-	previousToDelete.next = previousToDelete.next.next
+	previousToDelete.Next = previousToDelete.Next.Next
 	l.length--
 }
