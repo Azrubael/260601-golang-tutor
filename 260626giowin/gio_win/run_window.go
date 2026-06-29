@@ -22,7 +22,7 @@ func RunWindow(
 		ops                               op.Ops
 		input_window                      = new(widget.Editor)
 		BS BtnState
-		text_in_window string = "d:/tmp/звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
+		text_in_window string = "d:\\tmp\\звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
 		w_width               = 480
 		w_height              = 640
 	)
@@ -242,9 +242,9 @@ func handleButtonClicks(
 		err_shpk := error(nil)
 		*shpk_xlsx_ptr, err_shpk = OpenFileXlsx(title_shpk, "")
 		if err_shpk != nil || SHPK_XLSX.Data == nil {
-			fmt.Printf("Помилка відкриття %s: %v\n", SHPK_XLSX.FilePath, err_shpk)
+			logger.Printf("Помилка відкриття %s: %v\n", SHPK_XLSX.FilePath, err_shpk)
 		} else {
-			fmt.Printf("Файл %s успішно відкрито.\n", SHPK_XLSX.FilePath)
+			logger.Printf("Файл %s успішно відкрито.\n", SHPK_XLSX.FilePath)
 		}
 
 	case BS.proto_distrib_btn.Clicked(gtx):
@@ -255,10 +255,10 @@ func handleButtonClicks(
 		err_bo := error(nil)
 		*bo_xlsx_ptr, err_bo = OpenFileXlsx(title_bo, "")
 		if err_bo != nil || BO_XLSX.Data == nil {
-			fmt.Printf("Помилка відкриття %s з даними розподілу людей: %v\n",
+			logger.Printf("Помилка відкриття %s з даними розподілу людей: %v\n",
 			BO_XLSX.FilePath, err_bo)
 		} else {
-			fmt.Printf("Файл %s успішно відкрито.\n", BO_XLSX.FilePath)
+			logger.Printf("Файл %s успішно відкрито.\n", BO_XLSX.FilePath)
 		}
 
 	case BS.prep_shpk_btn.Clicked(gtx):
@@ -270,9 +270,9 @@ func handleButtonClicks(
 		err_shpk := error(nil)
 		SHPK_DATA, err_shpk = ReadShpkData(shpk_xlsx_ptr)
 		if err_shpk != nil || SHPK_DATA == nil {
-			fmt.Printf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
+			logger.Printf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
 		} else {
-			fmt.Println("Дані ШПК успішно перетворено з формату xlsx в словник.")
+			logger.Println("Дані ШПК успішно перетворено з формату xlsx в словник.")
 		}
 
 	case BS.prep_ppd_btn.Clicked(gtx):
@@ -284,15 +284,15 @@ func handleButtonClicks(
 		err_ppd := []string{}
 		PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(SHPK_DATA)
 		if err_ppd != nil || SHPK_DATA == nil {
-			fmt.Printf("Помилка підготовки звіту для ППД: %v\n", err_ppd)
+			logger.Printf("Помилка підготовки звіту для ППД: %v\n", err_ppd)
 		} else {
-			fmt.Println("Дані ШПК успішно пудготовлено для звіту ППД.")
+			logger.Println("Дані ШПК успішно пудготовлено для звіту ППД.")
 		}
 		err_ppd_save := SaveReportPPD(&PPD_COUNTER, &PPD_LIST, text_in_window)
 		if err_ppd_save != nil {
-			fmt.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", text_in_window, err_ppd_save)
+			logger.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", text_in_window, err_ppd_save)
 		} else {
-			fmt.Printf("Звіт для ППД успішно збережений в файл %s.\n", text_in_window)
+			logger.Printf("Звіт для ППД успішно збережений в файл %s.\n", text_in_window)
 		}
 
 	case BS.refresh_distrib_btn.Clicked(gtx):

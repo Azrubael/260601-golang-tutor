@@ -2,103 +2,98 @@ package gio_win
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/xuri/excelize/v2"
 )
 
-// Функція для додавання до xlsx об'єкту цілого рядка
-func SetRowValue(f *excelize.File, sheet string, row int, values []any) (int, error) {
+// SetRowValue - Функція для додавання до xlsx об'єкту цілого рядка
+func SetRowValue(f *excelize.File, sheet string, row int, values []string) error {
 	for i, v := range values {
 		col, _ := excelize.ColumnNumberToName(i + 1)
 		cell := fmt.Sprintf("%s%d", col, row)
 		if err := f.SetCellValue(sheet, cell, v); err != nil {
-			return row, err
+			log.Fatal(err)
+			return err
 		}
 	}
-	row++
-	return row, nil
+	return nil
 }
 
+// SaveReportPPD - Функція для запису звіту ППД
 func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	ppd_list_ptr *[][]ShortPersData, text_in_window string) error {
 
 	fmt.Println("SaveReportPPD() called")
-	currentTime := time.Now().Format("02.01.2006")
 
-	xlsx := excelize.NewFile()
-	sheetName := xlsx.GetSheetName(xlsx.GetActiveSheetIndex())
-
-	rowPtr := 1
-	tableHat := []string{"Призначення", "Офіцери", "Сержанти", "Солдати", "Загалом"}
-
-	// Функція - помічник для спрощення синтаксису при додаванні клітинок
-	setCell := func(i, row int, v any) error {
-		col, _ := excelize.ColumnNumberToName(i + 1)
-		cell := fmt.Sprintf("%s%d", col, row)
-    return xlsx.SetCellValue(sheetName, cell, v)
-	}
-
-	sheetTitle := fmt.Sprintf("Розподіл особового складу 3бо станом на %v", currentTime)
-	if err := setCell(1, rowPtr, sheetTitle); err != nil {
-		return err
-	}
-	rowPtr++
-
-	for i, element := range tableHat {
-		if err := setCell(i, rowPtr, element); err != nil {
-			return err
-		}
-	}
-	rowPtr++
-
-	// Створюємо таблицю лічильників розподілу
+	// Таблиця звіту, з которої буде створений xlsx файл
 	reportData := [][]string{}
+	tableHat := []string{
+		"Призначення", "Офіцери", "Сержанти", "Солдати", "Загалом",
+		"","","","",
+	}
+	reportData = append(reportData, tableHat)
+
+	// Додаємо в таблицю звіту лічильників розподілу
 	for _, element := range ppd_report_list {
 		dist := (*ppd_counter_ptr)[element]
-		content := []string{
+		dataRow := []string{
 			element,
 			fmt.Sprintf("%d", dist.Offi),
 			fmt.Sprintf("%d", dist.Serg),
 			fmt.Sprintf("%d", dist.Sold),
-			fmt.Sprintf("%d", dist.Total)}
-		reportData = append(reportData, content)
-	}
-
-	// Додаємо до об'єкту xlsx таблицю лічильників розподілу
-	for _, dataRow := range reportData {
-		for j, dataCell := range dataRow {
-			if err := setCell(j, rowPtr, dataCell); err != nil {
-				return err
-			}
-			rowPtr++
+			fmt.Sprintf("%d", dist.Total),
+			"","","","",
 		}
-	}
-
-	// Створюємо таблицю списку особового складу за призначенням
-	reportData = [][]string{}
-	for r, assignment := range *ppd_list_ptr {
-		// Створюємо заголовок призначення особового складу
-		dataRow := []string{"","","","", ppd_report_list[r]}
-		for i, element := range dataRow {
-			if err := setCell(i, rowPtr, element); err != nil {
-				return err
-			}
-		}
-		// Додаєм заголовок призначення до таблиці reportData
 		reportData = append(reportData, dataRow)
-		rowPtr++
+	}
+
+	// Створюємо список особового складу за призначенням
+	for r, assignment := range *ppd_list_ptr {
+		dataRow := []string{"","","","", ppd_report_list[r]}
+		reportData = append(reportData, dataRow)
 		for i, person := range assignment {
 			dataRow = []string{"","","","","", strconv.Itoa(i),
-			person.Rank, person.Name, person.Department}
-			for j, dataCell := range dataRow {
-				if err := setCell(j, rowPtr, dataCell); err != nil {
-					return err
-				}
+				person.Rank, person.Name, person.Department,
 			}
-			rowPtr++
+			reportData = append(reportData, dataRow)
 		}
+	}
+
+	// Створюємо об'єкт xlsx і додаємо до нього дані
+	xlsx := excelize.NewFile()
+	sheetName := xlsx.GetSheetName(xlsx.GetActiveSheetIndex())
+	now := time.Now()
+	dateTime := now.Format("02.01.2006")
+	sheetTitle := fmt.Sprintf("Розподіл особового складу 3бо станом на %v", dateTime)
+	if errCell := xlsx.SetCellValue(sheetName, "A1", sheetTitle); errCell != nil{
+		log.Fatal(errCell)
+		return errCell
+	}
+
+	for row, dataRow := range reportData {
+		if errRow := SetRowValue(xlsx, sheetName, row+1, dataRow); errRow != nil {
+			log.Fatal(errRow)
+			return errRow
+		}
+	}
+
+	// Зберігаємо дані в файл
+	timeStamp := now.Format("060102")
+	dirPPD := filepath.Dir(text_in_window)
+	if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
+		log.Printf("Такої директорії не існує: %s\n", dirPPD)
+	} else {
+		log.Printf("Успішно перевірено існування директорії: %s\n", dirPPD)
+	}
+	filename := filepath.Join(dirPPD, timeStamp + "_" + filepath.Base(text_in_window))
+	if err := xlsx.SaveAs(filename); err != nil {
+		log.Fatal(err)
+		return err
 	}
 	return nil
 }
