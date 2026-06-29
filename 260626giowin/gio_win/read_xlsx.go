@@ -218,8 +218,9 @@ func getCompanyForManagement(division string) (string, error) {
 }
 
 // ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
-func ReadShpkData(shpk xlsxData) (map[string]Person, error) {
+func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
 
+	shpk := *shpk_xlsx_ptr
 	shpk_data := make(map[string]Person)
 
 	// Отримання таблиці даних ШПС у вигляді рядків

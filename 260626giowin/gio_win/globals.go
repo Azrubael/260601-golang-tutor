@@ -80,7 +80,18 @@ type xlsxData struct {
 	FilePath string
 }
 
-var SHPK_XLSX, BO_XLSX xlsxData
+var (
+	// SHPK_XLSX, BO_XLSX - Змінні для зберігання зчитаних даних ШПК та розподілу в форматі Excel
+	SHPK_XLSX, BO_XLSX xlsxData
+	// SHPK_DATA - Підготовлені дані ШПК в форматі словника
+	SHPK_DATA map[string]Person
+	// PPD_COUNTER - Підготовлені дані для звіту ППД
+	PPD_COUNTER map[string]Distribution
+	// PPD_LIST - Списки людей по локаціям для звіту ППД
+	PPD_LIST [][]ShortPersData
+	// BO_COUNTER - Підготовлені дані для заповнення головної таблиці розподілу особового складу
+	BO_COUNTER map[string]map[string]Distribution
+)
 
 // ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
 var ppd_report_list []string = []string {

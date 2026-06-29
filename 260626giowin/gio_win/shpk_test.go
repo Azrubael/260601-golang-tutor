@@ -2,22 +2,9 @@ package gio_win
 
 import (
 	"fmt"
-	// "path/filepath"
 	"reflect"
 	"testing"
 )
-
-// TestOpenShpkFile - тестування функції OpenShpkFile
-// func TestOpenShpkFile(t *testing.T) {
-// 	filepath := ""
-// 	shpk, err := OpenFileXlsx("Тестовий текст TestOpenShpkFile", filepath)
-// 	if err != nil {
-// 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
-// 	} else {
-// 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
-// 	}
-
-// }
 
 // TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
@@ -29,7 +16,7 @@ func TestReadShpkFile(t *testing.T) {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
 
-	shpk_table, err := ReadShpkData(shpk)
+	shpk_table, err := ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
@@ -67,7 +54,7 @@ func TestPrepareReportPPD(t *testing.T) {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
 
-	shpk_table, err := ReadShpkData(shpk)
+	shpk_table, err := ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
@@ -96,7 +83,7 @@ func TestPrepareReportBO(t *testing.T) {
 	} else {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
-	shpk_table, err := ReadShpkData(shpk)
+	shpk_table, err := ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}

@@ -22,7 +22,7 @@ func RunWindow(
 		ops                               op.Ops
 		input_window                      = new(widget.Editor)
 		BS BtnState
-		text_in_window string = "d:\\tmp\\filename.xlsx"
+		text_in_window string = "d:/tmp/звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
 		w_width               = 480
 		w_height              = 640
 	)
@@ -40,7 +40,7 @@ func RunWindow(
 	BS.refresh_distrib_btn               = new(widget.Clickable)
 	BS.save_vacation_btn                 = new(widget.Clickable)
 
-	window.Option(app.Title("XLSX processing app"))
+	window.Option(app.Title("Звіти XLSX"))
 	window.Option(app.Size(unit.Dp(w_width), unit.Dp(w_height)))
 
 	for {
@@ -49,7 +49,7 @@ func RunWindow(
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			BS, text_in_window = handleButtonClicks(gtx, BS, SHPK_XLSX, BO_XLSX,
+			BS, text_in_window = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX,
 				input_window, text_in_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
@@ -57,7 +57,7 @@ func RunWindow(
 				Alignment: layout.Start}.Layout(gtx,
 				// Текстовий заголовок для поля вводу імені файлу для звіту
 				layout.Rigid(func(gtx C) D {
-						lbl := material.Body1(theme, "Ім'я файлу для звіту:")
+						lbl := material.Body1(theme, "Ім'я файлу для звіту ППД:")
 						lbl.Alignment = text.Middle
 						return lbl.Layout(gtx)
 				}),
@@ -120,14 +120,10 @@ func RunWindow(
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.shpk_btn, "Визначити ШПК",
 								BS.define_shpk, BS.define_distrib)
-								/*
-								SHPK_XLSX, SHPK_FILE_PATH, err := OpenFileXlsx()
-								*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.proto_distrib_btn, "Визначити прототип розподілу",
 								BS.define_distrib, BS.define_shpk)
-								/*OpenFileXlsx()*/
 							}),
 					)
 				})
@@ -144,25 +140,21 @@ func RunWindow(
 							return renderMenuButton(gtx, theme, BS.prep_shpk_btn,
 								"Підготувати дані ШПК",
 								BS.prepare_shpk, BS.prepare_ppd, BS.refresh_distrib, BS.save_vacation)
-								/*ReadShpkData()*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.prep_ppd_btn,
 								"Записати звіт для стройової",
 								BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib, BS.save_vacation)
-								/*SaveReportPPD()*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.refresh_distrib_btn,
 								"Оновити весь розподіл",
 								BS.refresh_distrib, BS.prepare_ppd, BS.prepare_shpk, BS.save_vacation)
-								/*UpdateDistributionBO()*/
 							}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.save_vacation_btn,
 								"Записати звіт по І відпустці",
 								BS.save_vacation, BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib)
-								/*SaveVacationReport1()*/
 							}),
 					)
 				})
@@ -215,9 +207,9 @@ func RunWindow(
 func handleButtonClicks(
 	gtx C,
 	BS BtnState,
-	SHPK_XLSX, BO_XLSX xlsxData,
+	shpk_xlsx_ptr, bo_xlsx_ptr *xlsxData,
 	input_window *widget.Editor,
-	text_in_window string,
+	text_in_window string, // Ім'я файлу для запису звіту ППД
 	logger *log.Logger,
 	) (BtnState, string) {
 
@@ -248,11 +240,11 @@ func handleButtonClicks(
 		BS.define_distrib = false
 		title_shpk := "Виберіть Excel файл ШПК"
 		err_shpk := error(nil)
-		SHPK_XLSX, err_shpk = OpenFileXlsx(title_shpk, "")
-		if err_shpk != nil {
-			fmt.Printf("Помилка відкриття %s: %v", SHPK_XLSX.FilePath, err_shpk)
+		*shpk_xlsx_ptr, err_shpk = OpenFileXlsx(title_shpk, "")
+		if err_shpk != nil || SHPK_XLSX.Data == nil {
+			fmt.Printf("Помилка відкриття %s: %v\n", SHPK_XLSX.FilePath, err_shpk)
 		} else {
-			fmt.Printf("Файл %s успішно відкрито", SHPK_XLSX.FilePath)
+			fmt.Printf("Файл %s успішно відкрито.\n", SHPK_XLSX.FilePath)
 		}
 
 	case BS.proto_distrib_btn.Clicked(gtx):
@@ -261,18 +253,27 @@ func handleButtonClicks(
 		BS.define_shpk = false
 		title_bo := "Виберіть Excel файл загального розподілу людей"
 		err_bo := error(nil)
-		BO_XLSX, err_bo = OpenFileXlsx(title_bo, "")
-		if err_bo != nil {
-			fmt.Printf("Помилка відкриття %s: %v", BO_XLSX.FilePath, err_bo)
+		*bo_xlsx_ptr, err_bo = OpenFileXlsx(title_bo, "")
+		if err_bo != nil || BO_XLSX.Data == nil {
+			fmt.Printf("Помилка відкриття %s з даними розподілу людей: %v\n",
+			BO_XLSX.FilePath, err_bo)
 		} else {
-			fmt.Printf("Файл %s успішно відкрито", BO_XLSX.FilePath)
+			fmt.Printf("Файл %s успішно відкрито.\n", BO_XLSX.FilePath)
 		}
+
 	case BS.prep_shpk_btn.Clicked(gtx):
 		logger.Println("Натиснуто кнопку: 'Підготувати дані ШПК'")
 		BS.prepare_shpk = !BS.prepare_shpk
 		BS.prepare_ppd = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
+		err_shpk := error(nil)
+		SHPK_DATA, err_shpk = ReadShpkData(shpk_xlsx_ptr)
+		if err_shpk != nil || SHPK_DATA == nil {
+			fmt.Printf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
+		} else {
+			fmt.Println("Дані ШПК успішно перетворено з формату xlsx в словник.")
+		}
 
 	case BS.prep_ppd_btn.Clicked(gtx):
 		logger.Println("Натиснуто кнопку: 'Записати звіт для стройової'")
@@ -280,7 +281,19 @@ func handleButtonClicks(
 		BS.prepare_shpk = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
-		SaveReportPPD()
+		err_ppd := []string{}
+		PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(SHPK_DATA)
+		if err_ppd != nil || SHPK_DATA == nil {
+			fmt.Printf("Помилка підготовки звіту для ППД: %v\n", err_ppd)
+		} else {
+			fmt.Println("Дані ШПК успішно пудготовлено для звіту ППД.")
+		}
+		err_ppd_save := SaveReportPPD(&PPD_COUNTER, &PPD_LIST, text_in_window)
+		if err_ppd_save != nil {
+			fmt.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", text_in_window, err_ppd_save)
+		} else {
+			fmt.Printf("Звіт для ППД успішно збережений в файл %s.\n", text_in_window)
+		}
 
 	case BS.refresh_distrib_btn.Clicked(gtx):
 		logger.Println("Натиснуто кнопку: 'Оновити весь розподіл'")
