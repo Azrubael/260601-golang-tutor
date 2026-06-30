@@ -1,7 +1,0 @@
-APP_LOG: 2026/06/27 11:55:33 main.go:29: Starting app. Logs are also visible in the terminal.
-APP_LOG: 2026/06/27 11:55:34 run_window.go:227: Натиснуто кнопку: 'Файл'
-APP_LOG: 2026/06/27 11:55:36 run_window.go:227: Натиснуто кнопку: 'Файл'
-APP_LOG: 2026/06/27 11:55:38 run_window.go:234: Натиснуто кнопку: 'Звіти'
-APP_LOG: 2026/06/27 11:55:40 run_window.go:240: Натиснуто кнопку: 'Допомога'
-APP_LOG: 2026/06/27 11:55:42 run_window.go:240: Натиснуто кнопку: 'Допомога'
-APP_LOG: 2026/06/27 11:55:43 run_window.go:240: Натиснуто кнопку: 'Допомога'
