@@ -1,7 +1,6 @@
 package gio_win
 
 import (
-	"fmt"
 	"log"
 
 	"image/color"
@@ -19,26 +18,26 @@ import (
 func RunWindow(
 	window *app.Window, logger *log.Logger) error {
 	var (
-		ops                               op.Ops
-		input_window                      = new(widget.Editor)
-		BS BtnState
-		text_in_window string = "d:\\tmp\\звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
-		w_width               = 480
-		w_height              = 640
+		ops            op.Ops
+		input_window   = new(widget.Editor)
+		BS             BtnState
+		w_width        = 480
+		w_height       = 640
+		text_in_window string
 	)
 
 	theme := material.NewTheme()
-	BS.file_btn                          = new(widget.Clickable)
-	BS.action_btn                        = new(widget.Clickable)
-	BS.help_btn                          = new(widget.Clickable)
+	BS.file_btn = new(widget.Clickable)
+	BS.action_btn = new(widget.Clickable)
+	BS.help_btn = new(widget.Clickable)
 
-	BS.shpk_btn                          = new(widget.Clickable)
-	BS.proto_distrib_btn                 = new(widget.Clickable)
+	BS.shpk_btn = new(widget.Clickable)
+	BS.proto_distrib_btn = new(widget.Clickable)
 
-	BS.prep_shpk_btn                     = new(widget.Clickable)
-	BS.prep_ppd_btn                      = new(widget.Clickable)
-	BS.refresh_distrib_btn               = new(widget.Clickable)
-	BS.save_vacation_btn                 = new(widget.Clickable)
+	BS.prep_shpk_btn = new(widget.Clickable)
+	BS.prep_ppd_btn = new(widget.Clickable)
+	BS.refresh_distrib_btn = new(widget.Clickable)
+	BS.save_vacation_btn = new(widget.Clickable)
 
 	window.Option(app.Title("Звіти XLSX"))
 	window.Option(app.Size(unit.Dp(w_width), unit.Dp(w_height)))
@@ -50,16 +49,16 @@ func RunWindow(
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
 			BS, text_in_window = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX,
-				input_window, text_in_window, logger)
+				input_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
 			layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceStart,
 				Alignment: layout.Start}.Layout(gtx,
 				// Текстовий заголовок для поля вводу імені файлу для звіту
 				layout.Rigid(func(gtx C) D {
-						lbl := material.Body1(theme, "Ім'я файлу для звіту ППД:")
-						lbl.Alignment = text.Middle
-						return lbl.Layout(gtx)
+					lbl := material.Body1(theme, "Ім'я файлу для звіту ППД:")
+					lbl.Alignment = text.Middle
+					return lbl.Layout(gtx)
 				}),
 				layout.Rigid( // Поле вводу імені файлу для звіту
 					func(gtx C) D {
@@ -69,11 +68,6 @@ func RunWindow(
 						// Визначення характеристик поля вводу
 						input_window.SingleLine = true
 						input_window.Alignment = text.Middle
-
-						if text_in_window != "" {
-							input_str := fmt.Sprint(text_in_window)
-							input_window.SetText(input_str)
-						}
 
 						margins := layout.Inset{
 							Top:    unit.Dp(0),
@@ -120,11 +114,11 @@ func RunWindow(
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.shpk_btn, "Визначити ШПК",
 								BS.define_shpk, BS.define_distrib)
-							}),
+						}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.proto_distrib_btn, "Визначити прототип розподілу",
 								BS.define_distrib, BS.define_shpk)
-							}),
+						}),
 					)
 				})
 
@@ -140,22 +134,22 @@ func RunWindow(
 							return renderMenuButton(gtx, theme, BS.prep_shpk_btn,
 								"Підготувати дані ШПК",
 								BS.prepare_shpk, BS.prepare_ppd, BS.refresh_distrib, BS.save_vacation)
-							}),
+						}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.prep_ppd_btn,
 								"Записати звіт для стройової",
 								BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib, BS.save_vacation)
-							}),
+						}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.refresh_distrib_btn,
 								"Оновити весь розподіл",
 								BS.refresh_distrib, BS.prepare_ppd, BS.prepare_shpk, BS.save_vacation)
-							}),
+						}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.save_vacation_btn,
 								"Записати звіт по І відпустці",
 								BS.save_vacation, BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib)
-							}),
+						}),
 					)
 				})
 			}
@@ -168,33 +162,33 @@ func RunWindow(
 					return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func(gtx C) D {
 							var zmist = "  Ця маленька програма призначена прискорити\n" +
-													"підготовку трьох типів звітів.\n" +
-													"  Після запуску цієї програми, з'явиться вікно, " +
-													"де потрібно обрати вхідний файл `xlsx` розподілу " +
-													"особового складу.\n" +
-													"  Потрібно переконатись, що обрано саме правильний " +
-													"файл ШПС, бо існує лише вбудована перевірка " +
-													"назви аркуша `ШПС`.\n" +
-													"За замовчуванням відбуваються спроба відкриття\n" +
-													"ШПС за шляхом:    `d:/tmp/ШПС-T0320.xlsx`\n" +
-													"  При обранні прототипу для звіту розподілу " +
-													"особового складу, потрібно переконатись, що цей " +
-													"файл може бути прототипом, бо існує лише " +
-													"перевірка назви аркуша `3БО`.\n" +
-													"  Для генерації звіту по відпусткам потрібно " +
-													"обрати вхідний файл `xlsx` розподілу особового " +
-													"складу, а потім обрати команду `Підготувати дані`."
+								"підготовку трьох типів звітів.\n" +
+								"  Після запуску цієї програми, з'явиться вікно, " +
+								"де потрібно обрати вхідний файл `xlsx` розподілу " +
+								"особового складу.\n" +
+								"  Потрібно переконатись, що обрано саме правильний " +
+								"файл ШПС, бо існує лише вбудована перевірка " +
+								"назви аркуша `ШПС`.\n" +
+								"За замовчуванням відбуваються спроба відкриття\n" +
+								"ШПС за шляхом:    `d:/tmp/ШПС-T0320.xlsx`\n" +
+								"  При обранні прототипу для звіту розподілу " +
+								"особового складу, потрібно переконатись, що цей " +
+								"файл може бути прототипом, бо існує лише " +
+								"перевірка назви аркуша `3БО`.\n" +
+								"  Для генерації звіту по відпусткам потрібно " +
+								"обрати вхідний файл `xlsx` розподілу особового " +
+								"складу, а потім обрати команду `Підготувати дані`."
 							return material.Body1(theme, zmist).Layout(gtx)
 						}),
 					)
 				})
 			} else {
-			// Вивід заголовку програми, вирівняного по центру вікна
-			title := material.H6(theme, "Генератор звітів")
-			title.Alignment = text.Middle
+				// Вивід заголовку програми, вирівняного по центру вікна
+				title := material.H6(theme, "Генератор звітів")
+				title.Alignment = text.Middle
 
-			layout.Inset{Top: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
-				return title.Layout(gtx)
+				layout.Inset{Top: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
+					return title.Layout(gtx)
 				})
 			}
 
@@ -209,9 +203,11 @@ func handleButtonClicks(
 	BS BtnState,
 	shpk_xlsx_ptr, bo_xlsx_ptr *xlsxData,
 	input_window *widget.Editor,
-	text_in_window string, // Ім'я файлу для запису звіту ППД
 	logger *log.Logger,
-	) (BtnState, string) {
+) (BtnState, string) {
+
+	var text_in_window = "d:\\tmp\\звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
+	var default_file_path = text_in_window
 
 	switch {
 
@@ -220,7 +216,6 @@ func handleButtonClicks(
 		BS.open_file = !BS.open_file
 		BS.open_action = false
 		BS.open_help = false
-		text_in_window = input_window.Text()
 
 	case BS.action_btn.Clicked(gtx):
 		logger.Println("Натиснуто кнопку: 'Звіти'")
@@ -256,7 +251,7 @@ func handleButtonClicks(
 		*bo_xlsx_ptr, err_bo = OpenFileXlsx(title_bo, "")
 		if err_bo != nil || BO_XLSX.Data == nil {
 			logger.Printf("Помилка відкриття %s з даними розподілу людей: %v\n",
-			BO_XLSX.FilePath, err_bo)
+				BO_XLSX.FilePath, err_bo)
 		} else {
 			logger.Printf("Файл %s успішно відкрито.\n", BO_XLSX.FilePath)
 		}
@@ -281,18 +276,27 @@ func handleButtonClicks(
 		BS.prepare_shpk = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
+		if text_in_window != "" {
+			text_in_window = input_window.Text()
+		} else {
+			text_in_window = default_file_path
+			input_window.SetText(text_in_window)
+		}
+		logger.Println(text_in_window)
+
 		err_ppd := []string{}
 		PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(SHPK_DATA)
-		if err_ppd != nil || SHPK_DATA == nil {
+		if len(err_ppd) != 0 || SHPK_DATA == nil {
 			logger.Printf("Помилка підготовки звіту для ППД: %v\n", err_ppd)
+
 		} else {
-			logger.Println("Дані ШПК успішно пудготовлено для звіту ППД.")
+			logger.Println("Дані ШПК успішно підготовлено для звіту ППД.")
 		}
-		err_ppd_save := SaveReportPPD(&PPD_COUNTER, &PPD_LIST, text_in_window)
+		saved_file, err_ppd_save := SaveReportPPD(&PPD_COUNTER, &PPD_LIST, text_in_window)
 		if err_ppd_save != nil {
-			logger.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", text_in_window, err_ppd_save)
+			logger.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", saved_file, err_ppd_save)
 		} else {
-			logger.Printf("Звіт для ППД успішно збережений в файл %s.\n", text_in_window)
+			logger.Printf("Звіт для ППД успішно збережений в файл %s.\n", saved_file)
 		}
 
 	case BS.refresh_distrib_btn.Clicked(gtx):
@@ -311,12 +315,13 @@ func handleButtonClicks(
 		BS.refresh_distrib = false
 		SaveVacationReport1()
 	}
+
 	return BS, text_in_window
 }
 
 // renderMenuButton - Функція для відображення кнопки меню з можливістю вибору
 func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
-	name string, current_flag bool , other_flags ...bool) D {
+	name string, current_flag bool, other_flags ...bool) D {
 	margins := layout.Inset{
 		Top:    unit.Dp(5),
 		Bottom: unit.Dp(0),
@@ -329,7 +334,7 @@ func renderMenuButton(gtx C, theme *material.Theme, btn *widget.Clickable,
 			if btn.Clicked(gtx) {
 				current_flag = !current_flag
 				for f := range other_flags {
-						other_flags[f] = false
+					other_flags[f] = false
 				}
 				// handler() // виклик переданої функції для обробки натискання кнопки
 			}

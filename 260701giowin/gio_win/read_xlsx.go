@@ -220,15 +220,21 @@ func getCompanyForManagement(division string) (string, error) {
 // ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
 func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
 
+	if shpk_xlsx_ptr == nil {
+		msg := "Помилка: shpk_xlsx_ptr == nil"
+		log.Println(msg)
+		return nil, fmt.Errorf("%s", msg)
+	}
 	shpk := *shpk_xlsx_ptr
-	shpk_data := make(map[string]Person)
 
 	// Отримання таблиці даних ШПС у вигляді рядків
 	shpk_rows, err_shpk := shpk.Data.GetRows("ШПС")
 	if err_shpk != nil {
 		log.Printf("Помилка зчитування змісту %s: %v", shpk.FilePath, err_shpk)
+		return nil, err_shpk
 	}
 
+	shpk_data := make(map[string]Person)
 	// Заповнення структури даних персоналу змістом, пропускаючи заголовки ШПС
 	for i := 2; i < len(shpk_rows) && i < 630; i++ { // index 2 = row 3
 		var platoon, company, department string

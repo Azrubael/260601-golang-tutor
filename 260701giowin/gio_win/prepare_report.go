@@ -70,6 +70,10 @@ func PrepareReportPPD(
 			ppdReportCounter[key] = Distribution{}
 	}
 
+	if len(shpk_data) == 0 {
+			count_err = append(count_err, "Потрібні дані ШПК не зчитано з файлу.")
+			return ppdReportCounter, [][]ShortPersData{}, count_err
+	}
 	for name, shpk_attr := range shpk_data {
 		person := ShortPersData{
 				Name:       name,

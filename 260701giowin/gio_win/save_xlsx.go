@@ -27,7 +27,7 @@ func SetRowValue(f *excelize.File, sheet string, row int, values []string) error
 
 // SaveReportPPD - Функція для запису звіту ППД
 func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
-	ppd_list_ptr *[][]ShortPersData, text_in_window string) error {
+	ppd_list_ptr *[][]ShortPersData, text_in_window string) (string , error) {
 
 	fmt.Println("SaveReportPPD() called")
 	// Створюємо об'єкт xlsx і додаємо до нього дані
@@ -37,18 +37,16 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	dateTime := now.Format("02.01.2006")
 	sheetTitle := fmt.Sprintf("Розподіл особового складу 3бо станом на %v", dateTime)
 	if errCell := xlsx.SetCellValue(sheetName, "A1", sheetTitle); errCell != nil{
-		log.Fatal(errCell)
-		return errCell
+		log.Println(errCell)
+		return "", errCell
 	}
 	if errCell := xlsx.SetCellValue(sheetName, "A2", ""); errCell != nil{
-		log.Fatal(errCell)
-		return errCell
+		log.Println(errCell)
+		return "", errCell
 	}
 
 	// Таблиця звіту, з которої буде створений xlsx файл
 	reportData := [][]string{}
-
-
 	emptyRow := []string{"", "", "", "", "", "", "", "", ""}
 	reportData = append(reportData, emptyRow)
 	tableHat := []string{
@@ -95,7 +93,6 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		return true
 	}
 
-
 	// Оголошення об'єкту "жирні літери"
 	boldStyle, err := xlsx.NewStyle(&excelize.Style{
 		Font: &excelize.Font{
@@ -104,23 +101,23 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		},
 	})
 	if err != nil {
-		log.Fatal("Помилка оголошення об'єкту 'жирні літери':", err)
-		return err
+		log.Println("Помилка оголошення об'єкту 'жирні літери':", err)
+		return "", err
 	}
 
 	// Цикл запису значень з масиву reportData в об'єкт xlsx
 	for rowIdx, dataRow := range reportData {
 		idxRow := rowIdx + 2
 		if err := SetRowValue(xlsx, sheetName, idxRow, dataRow); err != nil {
-			log.Fatal("Помилка запису значень в об'єкт xlsx:\n", idxRow, err)
-			return err
+			log.Printf("Помилка запису значень рядка %d в об'єкт xlsx:\n %v", idxRow, err)
+			return "", err
 		}
 
 		// Робиться перший рядок жирними літерами
 		if idxRow == 2 {
 			if err := xlsx.SetCellStyle(sheetName, "A1", "I1", boldStyle); err != nil {
-				log.Fatal("Помилка встановлення артібуту 'жирні літери' для першого рядка:\n", err)
-				return err
+				log.Printf("Помилка встановлення артібуту 'жирні літери' для першого рядка: \n%v", err)
+				return "", err
 			}
 			continue
 		}
@@ -131,8 +128,8 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 			startCell := fmt.Sprintf("A%d", idxRow)
 			endCell := fmt.Sprintf("%s%d", endCol, idxRow)
 			if err := xlsx.SetCellStyle(sheetName, startCell, endCell, boldStyle); err != nil {
-				log.Fatal("Помилка встановлення артібуту 'жирні літери' для рядка:\n", rowIdx, err)
-				return err
+				log.Printf("Помилка встановлення артібуту 'жирні літери' для рядка %d:\n %v", rowIdx, err)
+				return "", err
 			}
 		}
 	}
@@ -145,8 +142,8 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		for row := 2; row <= maxRow; row++ {
 			cell, err := xlsx.GetCellValue(sheetName, fmt.Sprintf("%s%d", colName, row))
 			if err != nil {
-				log.Fatal("Помилка отримання кількості літерів в клітинці для вирівнювання по ширині:\n", err)
-				return err
+				log.Println("Помилка отримання кількості літерів в клітинці для вирівнювання по ширині: ", err)
+				return "", err
 			}
 			if l := utf8.RuneCountInString(cell); l > maxLen {
 				maxLen = l
@@ -164,25 +161,29 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 			width = 10
 		}
 		if err := xlsx.SetColWidth(sheetName, colName, colName, width); err != nil {
-			log.Fatal("Помилка вирівнювання колонок по ширині:\n", err)
-			return err
+			log.Println("Помилка вирівнювання колонок по ширині: ", err)
+			return "", err
 		}
 	}
 
 	// Зберігаємо дані в файл
 	timeStamp := now.Format("060102")
-	dirPPD := filepath.Dir(text_in_window)
-	if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
-		log.Printf("Такої директорії не існує: %s\n", dirPPD)
-	} else {
-		log.Printf("Успішно перевірено існування директорії: %s\n", dirPPD)
+	dirPPD := ""
+	if text_in_window != "" {
+		dirPPD = filepath.Dir(text_in_window)
+		if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
+			log.Println("Такої директорії не існує: ", dirPPD)
+		} else {
+			log.Println("Успішно перевірено існування директорії: ", dirPPD)
+		}
 	}
+
 	filename := filepath.Join(dirPPD, timeStamp+"_"+filepath.Base(text_in_window))
 	if err := xlsx.SaveAs(filename); err != nil {
-		log.Fatal("Помилка збережання даних в xlsx файл:\n",err)
-		return err
+		log.Println("Помилка збережання даних в xlsx файл: ",err)
+		return "", err
 	}
-	return nil
+	return filename, nil
 }
 
 func UpdateDistributionBO() {
