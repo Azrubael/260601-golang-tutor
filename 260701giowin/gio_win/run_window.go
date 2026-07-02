@@ -1,6 +1,7 @@
 package gio_win
 
 import (
+	"fmt"
 	"log"
 
 	"image/color"
@@ -21,12 +22,16 @@ func RunWindow(
 		ops            op.Ops
 		input_window   = new(widget.Editor)
 		BS             BtnState
+		title material.LabelStyle
+		default_msg = "Генератор звітів"
+		text_in_window string
+		err_msg 			 string
 		w_width        = 480
 		w_height       = 640
-		text_in_window string
 	)
 
 	theme := material.NewTheme()
+	title = material.Body1(theme, default_msg)
 	BS.file_btn = new(widget.Clickable)
 	BS.action_btn = new(widget.Clickable)
 	BS.help_btn = new(widget.Clickable)
@@ -48,7 +53,7 @@ func RunWindow(
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			BS, text_in_window = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX,
+			BS, text_in_window, err_msg = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX,
 				input_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
@@ -106,7 +111,7 @@ func RunWindow(
 			// Відображення кнопок для вибору дій, якщо прапорець відповідної кнопки кореневого меню задіяний
 			if BS.open_file {
 				layout.Inset{
-					Top:   unit.Dp(100),
+					Top:   unit.Dp(120),
 					Left:  unit.Dp(25),
 					Right: unit.Dp(25),
 				}.Layout(gtx, func(gtx C) D {
@@ -182,15 +187,19 @@ func RunWindow(
 						}),
 					)
 				})
-			} else {
-				// Вивід заголовку програми, вирівняного по центру вікна
-				title := material.H6(theme, "Генератор звітів")
-				title.Alignment = text.Middle
-
-				layout.Inset{Top: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
-					return title.Layout(gtx)
-				})
 			}
+
+
+			if err_msg != "" {
+				title = material.Body1(theme, err_msg)
+			}
+			// Вивід заголовку програми, вирівняного по центру вікна
+			title.Alignment = text.Middle
+
+			layout.Inset{Top: unit.Dp(15)}.Layout(gtx, func(gtx C) D {
+				return title.Layout(gtx)
+			})
+
 
 			typ.Frame(gtx.Ops)
 		}
@@ -204,10 +213,13 @@ func handleButtonClicks(
 	shpk_xlsx_ptr, bo_xlsx_ptr *xlsxData,
 	input_window *widget.Editor,
 	logger *log.Logger,
-) (BtnState, string) {
+) (BtnState, string, string) {
 
-	var text_in_window = "d:\\tmp\\звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
-	var default_file_path = text_in_window
+	var (
+		text_in_window = "d:\\tmp\\звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
+		default_file_path = text_in_window
+		msg = ""
+	)
 
 	switch {
 
@@ -237,9 +249,11 @@ func handleButtonClicks(
 		err_shpk := error(nil)
 		*shpk_xlsx_ptr, err_shpk = OpenFileXlsx(title_shpk, "")
 		if err_shpk != nil || SHPK_XLSX.Data == nil {
+			msg = fmt.Sprintf("Помилка відкриття %s", SHPK_XLSX.FilePath)
 			logger.Printf("Помилка відкриття %s: %v\n", SHPK_XLSX.FilePath, err_shpk)
 		} else {
-			logger.Printf("Файл %s успішно відкрито.\n", SHPK_XLSX.FilePath)
+			msg = fmt.Sprintf("Файл %s успішно відкрито.", SHPK_XLSX.FilePath)
+			logger.Println(msg)
 		}
 
 	case BS.proto_distrib_btn.Clicked(gtx):
@@ -250,10 +264,13 @@ func handleButtonClicks(
 		err_bo := error(nil)
 		*bo_xlsx_ptr, err_bo = OpenFileXlsx(title_bo, "")
 		if err_bo != nil || BO_XLSX.Data == nil {
+			msg = fmt.Sprintf("Помилка відкриття %s з даними розподілу людей",
+				BO_XLSX.FilePath)
 			logger.Printf("Помилка відкриття %s з даними розподілу людей: %v\n",
 				BO_XLSX.FilePath, err_bo)
 		} else {
-			logger.Printf("Файл %s успішно відкрито.\n", BO_XLSX.FilePath)
+			msg = fmt.Sprintf("Файл %s успішно відкрито.", BO_XLSX.FilePath)
+			logger.Println(msg)
 		}
 
 	case BS.prep_shpk_btn.Clicked(gtx):
@@ -265,9 +282,11 @@ func handleButtonClicks(
 		err_shpk := error(nil)
 		SHPK_DATA, err_shpk = ReadShpkData(shpk_xlsx_ptr)
 		if err_shpk != nil || SHPK_DATA == nil {
-			logger.Printf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
+			msg = fmt.Sprintf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
+			logger.Println(msg)
 		} else {
-			logger.Println("Дані ШПК успішно перетворено з формату xlsx в словник.")
+			msg = "Дані ШПК успішно перетворено з формату xlsx в словник."
+			logger.Println(msg)
 		}
 
 	case BS.prep_ppd_btn.Clicked(gtx):
@@ -287,16 +306,19 @@ func handleButtonClicks(
 		err_ppd := []string{}
 		PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(SHPK_DATA)
 		if len(err_ppd) != 0 || SHPK_DATA == nil {
-			logger.Printf("Помилка підготовки звіту для ППД: %v\n", err_ppd)
-
+			msg = fmt.Sprintf("Помилка підготовки звіту для ППД: %v", err_ppd)
+			logger.Println(msg)
 		} else {
-			logger.Println("Дані ШПК успішно підготовлено для звіту ППД.")
+			msg = "Дані ШПК успішно підготовлено для звіту ППД."
+			logger.Println(msg)
 		}
 		saved_file, err_ppd_save := SaveReportPPD(&PPD_COUNTER, &PPD_LIST, text_in_window)
 		if err_ppd_save != nil {
+			msg = fmt.Sprintf("Помилка збереження звіту ППД до файлу %s", saved_file)
 			logger.Printf("Помилка збереження звіту ППД до файлу %s: %v\n", saved_file, err_ppd_save)
 		} else {
-			logger.Printf("Звіт для ППД успішно збережений в файл %s.\n", saved_file)
+			msg = fmt.Sprintf("Звіт для ППД успішно збережений в файл %s.", saved_file)
+			logger.Println(msg)
 		}
 
 	case BS.refresh_distrib_btn.Clicked(gtx):
@@ -316,7 +338,7 @@ func handleButtonClicks(
 		SaveVacationReport1()
 	}
 
-	return BS, text_in_window
+	return BS, text_in_window, msg
 }
 
 // renderMenuButton - Функція для відображення кнопки меню з можливістю вибору

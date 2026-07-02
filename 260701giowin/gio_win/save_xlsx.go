@@ -30,6 +30,12 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	ppd_list_ptr *[][]ShortPersData, text_in_window string) (string , error) {
 
 	fmt.Println("SaveReportPPD() called")
+	if len(*ppd_counter_ptr) == 0 || len(*ppd_list_ptr) == 0 {
+		errPtr := fmt.Errorf("Будь ласка, завантажте і підготуйте дані ШПК для звіту ППД.")
+		log.Println(errPtr)
+		return "", errPtr
+	}
+
 	// Створюємо об'єкт xlsx і додаємо до нього дані
 	xlsx := excelize.NewFile()
 	sheetName := xlsx.GetSheetName(xlsx.GetActiveSheetIndex())
@@ -169,19 +175,24 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	// Зберігаємо дані в файл
 	timeStamp := now.Format("060102")
 	dirPPD := ""
-	if text_in_window != "" {
-		dirPPD = filepath.Dir(text_in_window)
-		if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
-			log.Println("Такої директорії не існує: ", dirPPD)
-		} else {
-			log.Println("Успішно перевірено існування директорії: ", dirPPD)
-		}
+	if text_in_window == "" {
+		text_in_window = "d:/tmp/звіт_ППД.xlsx"
+	}
+
+	dirPPD = filepath.Dir(text_in_window)
+	if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
+		msgDir := fmt.Sprintf("Директорії %s не існує, створіть її cfvs!\n", dirPPD)
+		log.Println(msgDir)
+		errDir := fmt.Errorf("%s", msgDir)
+		return text_in_window, errDir
+	} else {
+		log.Println("Успішно перевірено існування директорії: ", dirPPD)
 	}
 
 	filename := filepath.Join(dirPPD, timeStamp+"_"+filepath.Base(text_in_window))
 	if err := xlsx.SaveAs(filename); err != nil {
 		log.Println("Помилка збережання даних в xlsx файл: ",err)
-		return "", err
+		return filename, err
 	}
 	return filename, nil
 }
