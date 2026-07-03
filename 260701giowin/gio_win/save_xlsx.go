@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -26,7 +25,7 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 
 		// Заміна нульових значень на пусті рядка
 		var toWrite any
-		switch val := any(v).(type) {
+		switch any(v).(type) {
 		case int, int8, int16, int32, int64,
 			uint, uint8, uint16, uint32, uint64,
 			float32, float64:
@@ -36,28 +35,12 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 				toWrite = v
 			}
 		case string:
-			if val == "" || val == "0" {
-				toWrite = ""
-			}
+				toWrite = v
 		default:
 			toWrite = fmt.Sprintf("%v", v)
 		}
 
 		if err = f.SetCellValue(sheet, cell, toWrite); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// SetRowValue - Функція для додавання до xlsx об'єкту цілого рядка
-func SetRowValue(f *excelize.File, sheet string,
-	row int, colOffcet int, values []string) error {
-	for i, v := range values {
-		col, _ := excelize.ColumnNumberToName(i + colOffcet)
-		cell := fmt.Sprintf("%s%d", col, row)
-		if err := f.SetCellValue(sheet, cell, v); err != nil {
-			log.Fatal(err)
 			return err
 		}
 	}
@@ -189,7 +172,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	// Цикл запису значень з масиву reportData в об'єкт xlsx
 	for rowIdx, dataRow := range reportData {
 		idxRow := rowIdx + 2
-		if err := SetRowValue(xlsx, sheetName, idxRow, 1, dataRow); err != nil {
+		if err := SetRowValueGeneric(xlsx, sheetName, idxRow, 1, dataRow); err != nil {
 			log.Printf("Помилка запису значень рядка %d в об'єкт xlsx:\n %v", idxRow, err)
 			return "", err
 		}
@@ -247,42 +230,17 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		}
 	}
 
-	// timeStamp := now.Format("060102")
-	// dirPPD := ""
-	// if pathReportPPD == "" {
-		// 	pathReportPPD = "d:/tmp/звіт_ППД.xlsx"
-		// }
-
-		// dirPPD = filepath.Dir(pathReportPPD)
-	// if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
-		// 	msgDir := fmt.Sprintf("Директорії %s не існує, створіть її самі!\n", dirPPD)
-		// 	log.Println(msgDir)
-		// 	errDir := fmt.Errorf("%s", msgDir)
-		// 	return pathReportPPD, errDir
-		// } else {
-			// 	log.Println("Успішно перевірено існування директорії: ", dirPPD)
-			// }
-
-			// filename := filepath.Join(dirPPD, timeStamp+"_"+filepath.Base(pathReportPPD))
-			// if err := xlsx.SaveAs(filename); err != nil {
-				// 	log.Println("Помилка збережання даних в xlsx файл: ", err)
-				// 	return filename, err
-				// }
-				// return filename, nil
-
+	// Зберігаємо дані в файл
 	var xlsxFile = xlsxData{
 		Data : xlsx,
 		FilePath : pathReportPPD,
 	}
-
-	// Зберігаємо дані в файл
 	factFilepath, err_save := saveXlsxFile(&xlsxFile,	"d:/tmp/звіт_ППД.xlsx")
 	if err_save != nil {
 		log.Println(err_save)
 		return factFilepath, err_save
 	}
 	return factFilepath, nil
-
 }
 
 // UpdateDistributionBO - Оновлення загального розподілу особового складу та запис оновлених даних в новий файл
@@ -339,16 +297,4 @@ func UpdateDistributionBO(
 func SaveVacationReport1() string {
 	// fmt.Println("SaveVacationReport1() called")
 	return "SaveVacationReport1() called"
-}
-
-// SetRowHeightXlsx - Встановлює висоту рядка в файлі excelize.File, зберігши інші властивості
-func SetRowHeightXlsx(f *excelize.File, sheet string, row int, height float64, txt string) error {
-	wrap_lines := len(strings.Fields(txt))
-	if wrap_lines == 1 {
-		return nil
-	}
-	required_height := (float64(wrap_lines)) * height
-	err_height := f.SetRowHeight(sheet, row, required_height)
-
-	return err_height
 }
