@@ -222,5 +222,22 @@ func PrepareReportBO(shpk_data map[string]Person) (
 		}
 	}
 
+	// Визначення підсумкових даних за призначеннями по званням
+	for _, brl := range bo_report_list {
+		offi, serg, sold := 0, 0, 0
+		for _, comp := range comp_list {
+		if comp == "підсумок" { continue }
+			el := boReportCounter[comp][brl]
+			offi += el.Offi
+			serg += el.Serg
+			sold += el.Sold
+		}
+		boReportCounter["підсумок"][brl] = Distribution{
+			Offi : offi,
+			Serg : serg,
+			Sold : sold,
+		}
+	}
+
 	return boReportCounter, count_err
 }

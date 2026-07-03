@@ -13,17 +13,9 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-// Оголошення інтерфейсу для даних, що мають бути записані в *.xlsx файл
-type cellValue interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-		~float32 | ~float64 |
-		~string
-}
-
 // SetRowValueGeneric - Функція для додавання до xlsx об'єкту рядка даних []cellValue
-func SetRowValueGeneric[T cellValue](	f *excelize.File,	sheet string,
-	row int,	colOffset int, values []T ) error {
+func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
+	row int, colOffset int, values []T) error {
 
 	for i, v := range values {
 		colName, err := excelize.ColumnNumberToName(i + colOffset)
@@ -32,7 +24,7 @@ func SetRowValueGeneric[T cellValue](	f *excelize.File,	sheet string,
 		}
 		cell := fmt.Sprintf("%s%d", colName, row)
 
-		// ---- Zero‑value handling ----
+		// Заміна нульових значень на пусті рядка
 		var toWrite any
 		switch val := any(v).(type) {
 		case int, int8, int16, int32, int64,
@@ -58,7 +50,7 @@ func SetRowValueGeneric[T cellValue](	f *excelize.File,	sheet string,
 	return nil
 }
 
-// SetRowValue - Функція для додавання до xlsx об'єкту рядка даних []string
+// SetRowValue - Функція для додавання до xlsx об'єкту цілого рядка
 func SetRowValue(f *excelize.File, sheet string,
 	row int, colOffcet int, values []string) error {
 	for i, v := range values {
@@ -70,6 +62,42 @@ func SetRowValue(f *excelize.File, sheet string,
 		}
 	}
 	return nil
+}
+
+// saveXlsxFile - Функція для типового запису файлу *.xlsx на жорсткий диск
+func saveXlsxFile(xlsxPtr *xlsxData,
+	defaultPath string) (factFilepath string, err error) {
+
+	if xlsxPtr == nil {
+		err_arg := fmt.Errorf("Дані прототипу розподілу особового не передано до 'saveXlsxFile()'!\n")
+		log.Println(err_arg)
+		return "", err
+	}
+	xlsx := (*xlsxPtr).Data
+	selectedPath := (*xlsxPtr).FilePath
+	if selectedPath == "" {
+		selectedPath = defaultPath
+	}
+
+	timeStamp := time.Now().Format("060102")
+	directory := filepath.Dir(defaultPath)
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		msgDir := fmt.Sprintf("Директорії %s не існує, створіть її самі!\n", directory)
+		log.Println(msgDir)
+		errDir := fmt.Errorf("%s", msgDir)
+		return defaultPath, errDir
+	} else {
+		log.Println("Успішно перевірено існування директорії: ", directory)
+	}
+	filename := filepath.Join(directory, timeStamp+"-"+filepath.Base(defaultPath))
+	if err := xlsx.SaveAs(filename); err != nil {
+		log.Println("Помилка збережання даних в xlsx файл: ", err)
+		return filename, err
+	}
+
+	factFilepath = defaultPath
+	return factFilepath, nil
+
 }
 
 // SaveReportPPD - Функція для запису звіту ППД
@@ -161,7 +189,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	// Цикл запису значень з масиву reportData в об'єкт xlsx
 	for rowIdx, dataRow := range reportData {
 		idxRow := rowIdx + 2
-		if err := SetRowValueGeneric(xlsx, sheetName, idxRow, 1, dataRow); err != nil {
+		if err := SetRowValue(xlsx, sheetName, idxRow, 1, dataRow); err != nil {
 			log.Printf("Помилка запису значень рядка %d в об'єкт xlsx:\n %v", idxRow, err)
 			return "", err
 		}
@@ -219,29 +247,42 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		}
 	}
 
+	// timeStamp := now.Format("060102")
+	// dirPPD := ""
+	// if pathReportPPD == "" {
+		// 	pathReportPPD = "d:/tmp/звіт_ППД.xlsx"
+		// }
+
+		// dirPPD = filepath.Dir(pathReportPPD)
+	// if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
+		// 	msgDir := fmt.Sprintf("Директорії %s не існує, створіть її самі!\n", dirPPD)
+		// 	log.Println(msgDir)
+		// 	errDir := fmt.Errorf("%s", msgDir)
+		// 	return pathReportPPD, errDir
+		// } else {
+			// 	log.Println("Успішно перевірено існування директорії: ", dirPPD)
+			// }
+
+			// filename := filepath.Join(dirPPD, timeStamp+"_"+filepath.Base(pathReportPPD))
+			// if err := xlsx.SaveAs(filename); err != nil {
+				// 	log.Println("Помилка збережання даних в xlsx файл: ", err)
+				// 	return filename, err
+				// }
+				// return filename, nil
+
+	var xlsxFile = xlsxData{
+		Data : xlsx,
+		FilePath : pathReportPPD,
+	}
+
 	// Зберігаємо дані в файл
-	timeStamp := now.Format("060102")
-	dirPPD := ""
-	if pathReportPPD == "" {
-		pathReportPPD = "d:/tmp/звіт_ППД.xlsx"
+	factFilepath, err_save := saveXlsxFile(&xlsxFile,	"d:/tmp/звіт_ППД.xlsx")
+	if err_save != nil {
+		log.Println(err_save)
+		return factFilepath, err_save
 	}
+	return factFilepath, nil
 
-	dirPPD = filepath.Dir(pathReportPPD)
-	if _, err := os.Stat(dirPPD); os.IsNotExist(err) {
-		msgDir := fmt.Sprintf("Директорії %s не існує, створіть її самі!\n", dirPPD)
-		log.Println(msgDir)
-		errDir := fmt.Errorf("%s", msgDir)
-		return pathReportPPD, errDir
-	} else {
-		log.Println("Успішно перевірено існування директорії: ", dirPPD)
-	}
-
-	filename := filepath.Join(dirPPD, timeStamp+"_"+filepath.Base(pathReportPPD))
-	if err := xlsx.SaveAs(filename); err != nil {
-		log.Println("Помилка збережання даних в xlsx файл: ", err)
-		return filename, err
-	}
-	return filename, nil
 }
 
 // UpdateDistributionBO - Оновлення загального розподілу особового складу та запис оновлених даних в новий файл
@@ -254,8 +295,8 @@ func UpdateDistributionBO(
 		err_arg := fmt.Errorf("Будь ласка, завантажте і підготуйте дані ШПК для для оновлення загального розподілу.\n")
 		log.Println(err_arg)
 		return "", err_arg
-	case bo_xlsx_ptr == nil /*|| BO_XLSX == xlsxData{}*/:
-		err_arg := fmt.Errorf("Будь ласка, завантажте дані прототипу розподілу особового складу.\n")
+	case bo_xlsx_ptr == nil:
+		err_arg := fmt.Errorf("Дані прототипу розподілу особового не передано до 'UpdateDistributionBO()'!\n")
 		log.Println(err_arg)
 		return "", err_arg
 	}
@@ -277,7 +318,7 @@ func UpdateDistributionBO(
 	}
 
 	// Оновлення об'єкту, що містить дані в форматі xlsx, перед записом в файл
-	startCol := 6  // Починаємо заповнювати зі стовпчика 'F'
+	startCol := 6 // Починаємо заповнювати зі стовпчика 'F'
 	for rowIdx, dataRow := range distribMatrix {
 		idxRow := rowIdx + 3
 		if err := SetRowValueGeneric(xlsx, sheetName, idxRow, startCol, dataRow); err != nil {
@@ -287,27 +328,12 @@ func UpdateDistributionBO(
 	}
 
 	// Зберігаємо дані в файл
-	timeStamp := time.Now().Format("060102")
-	dirBO := ""
-	if BO_XLSX.FilePath == "" {
-		pathReportBO = "d:/tmp/3бо.xlsx"
-		BO_XLSX.FilePath = pathReportBO
+	factFilepath, err_save := saveXlsxFile(bo_xlsx_ptr,	"d:/tmp/3бо.xlsx")
+	if err_save != nil {
+		log.Println(err_save)
+		return factFilepath, err_save
 	}
-	dirBO = filepath.Dir(BO_XLSX.FilePath)
-	if _, err := os.Stat(dirBO); os.IsNotExist(err) {
-		msgDir := fmt.Sprintf("Директорії %s не існує, створіть її самі!\n", dirBO)
-		log.Println(msgDir)
-		errDir := fmt.Errorf("%s", msgDir)
-		return pathReportBO, errDir
-	} else {
-		log.Println("Успішно перевірено існування директорії: ", dirBO)
-	}
-	filename := filepath.Join(dirBO, timeStamp+"-"+filepath.Base(pathReportBO))
-	if err := xlsx.SaveAs(filename); err != nil {
-		log.Println("Помилка збережання даних в xlsx файл: ", err)
-		return filename, err
-	}
-	return pathReportBO, nil
+	return factFilepath, nil
 }
 
 func SaveVacationReport1() string {

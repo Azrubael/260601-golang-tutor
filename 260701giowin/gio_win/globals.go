@@ -10,6 +10,14 @@ import (
 type C = layout.Context
 type D = layout.Dimensions
 
+// Оголошення інтерфейсу для даних, що мають бути записані в *.xlsx файл
+type cellValue interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+		~float32 | ~float64 |
+		~string
+}
+
 // BtnState - структура для зберігання стану кнопок та прапорців
 type BtnState struct {
 	file_btn, action_btn, help_btn,

@@ -70,8 +70,6 @@ func TestPrepareReportPPD(t *testing.T) {
 			key, d.Offi, d.Serg, d.Sold, d.Total)
 	}
 	fmt.Printf("Кількість людей після обробки: %d\n", counter[ppd_report_list[l-1]].Total)
-	// fmt.Println(report)
-
 }
 
 // TestPrepareReportBO - тестування функції PrepareReportBO

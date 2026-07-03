@@ -36,7 +36,6 @@ func TestUpdateReportBO(t *testing.T) {
 		reflect.TypeOf(bo_xlsx_test))
 	}
 
-
 	savedFile, err_save := UpdateDistributionBO(boReportCounter, &bo_xlsx_test, "")
 	if err_save != nil {
 		t.Fatalf("Помилка запису оновлених даних загального розподілу до файлу %s:\n%v\n",
