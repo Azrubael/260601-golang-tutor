@@ -31,7 +31,7 @@ func main() {
 	go func() {
 		window := new(app.Window)
 
-		if err := gio_win.RunWindow(window, logger); err != nil {
+		if err := gio_win.RenderWindow(window, logger); err != nil {
 			logger.Printf("window error: %v", err)
 		}
 		logFile.Close()

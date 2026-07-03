@@ -12,28 +12,28 @@ type D = layout.Dimensions
 
 // BtnState - структура для зберігання стану кнопок та прапорців
 type BtnState struct {
-		file_btn, action_btn, help_btn,
-    shpk_btn, proto_distrib_btn,
-    prep_shpk_btn, prep_ppd_btn, refresh_distrib_btn, save_vacation_btn *widget.Clickable
-		open_file, open_action, open_help,
-    define_shpk, define_distrib,
-    prepare_shpk, prepare_ppd, refresh_distrib, save_vacation bool
+	file_btn, action_btn, help_btn,
+	shpk_btn, proto_distrib_btn,
+	prep_shpk_btn, prep_ppd_btn, refresh_distrib_btn, save_vacation_btn *widget.Clickable
+	open_file, open_action, open_help,
+	define_shpk, define_distrib,
+	prepare_shpk, prepare_ppd, refresh_distrib, save_vacation bool
 }
 
 // Distribution - Структура для зберігання даних про розподіл особового складу в підрозділах по категоріях
 type Distribution struct {
-	Offi int
-	Serg int
-	Sold int
+	Offi  int
+	Serg  int
+	Sold  int
 	Total int
 }
 
 // ShortPersData - Структура для зберігання скорочених даних про військовослужбовця (для звіту ППД)
 type ShortPersData struct {
-	Name string
+	Name       string
 	Department string
-	Rank string
-	Company string
+	Rank       string
+	Company    string
 }
 
 // Person - Структура для зберігання даних ШПК про військовослужбовця
@@ -63,7 +63,7 @@ type openFileNameW struct {
 	lpstrFile         *uint16
 	nMaxFile          uint32
 	lpstrFileTitle    *uint16
-	nMaxFileTitle    uint32
+	nMaxFileTitle     uint32
 	lpstrInitialDir   *uint16
 	lpstrTitle        *uint16
 	Flags             uint32
@@ -72,11 +72,11 @@ type openFileNameW struct {
 	lpstrDefExt       *uint16
 	lCustData         uintptr
 	lpfnHook          uintptr
-	lpTemplateName   *uint16
+	lpTemplateName    *uint16
 }
 
 type xlsxData struct {
-	Data *excelize.File
+	Data     *excelize.File
 	FilePath string
 }
 
@@ -94,7 +94,7 @@ var (
 )
 
 // ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
-var ppd_report_list []string = []string {
+var ppd_report_list []string = []string{
 	"ППД",
 	"Відпустка",
 	"Шпиталь",
@@ -104,7 +104,7 @@ var ppd_report_list []string = []string {
 }
 
 // bo_report_list - Перелік категорій, за якими ведеться розподіл особового складу по підрозділам всієї частини
-var bo_report_list []string = []string {
+var bo_report_list []string = []string{
 	"Загалом",
 	"Відпустка",
 	"Шпиталь",

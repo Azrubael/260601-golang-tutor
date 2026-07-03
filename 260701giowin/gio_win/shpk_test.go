@@ -92,11 +92,10 @@ func TestPrepareReportBO(t *testing.T) {
 		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n", err)
 	}
 
-	for i := 0; i < len(bo_report_list); i++ {
+	for i := range bo_report_list {
 		fmt.Println("=== Report ===", bo_report_list[i])
 		for _, c := range comp_list {
 			fmt.Println(c, "\t", boReportCounter[c][bo_report_list[i]])
 		}
 	}
 }
-

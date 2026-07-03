@@ -14,7 +14,7 @@ import (
 
 // LoadExcelFile - Завантаження Excel файлу
 func LoadExcelFile(filePath string) (*excelize.File, error) {
-		xlsx, err_shpk := excelize.OpenFile(filePath)
+	xlsx, err_shpk := excelize.OpenFile(filePath)
 	if err_shpk != nil {
 		log.Printf("Помилка відкриття %s: %v", filePath, err_shpk)
 		return nil, err_shpk
@@ -43,11 +43,6 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 		OFN_PATHMUSTEXIST = 0x00000800
 		MAX_PATH          = 260
 	)
-	// var (
-	// 	shpk_xlsx *excelize.File
-	// 	shpk_file_path string
-	// 	err_shpk   error
-	// )
 
 	modComdlg32 := windows.NewLazySystemDLL("comdlg32.dll")
 	procGetOpenFileNameW := modComdlg32.NewProc("GetOpenFileNameW")
@@ -78,7 +73,7 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 
 	fileBuf := make([]uint16, MAX_PATH)
 	ofn := openFileNameW{
-		lStructSize:  uint32(unsafe.Sizeof(openFileNameW{})),
+		lStructSize: uint32(unsafe.Sizeof(openFileNameW{})),
 		// hwndOwner/hInstance/other unused fields: 0
 		lpstrFilter:  &filters16[0],
 		lpstrFile:    &fileBuf[0],
@@ -108,7 +103,7 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 	// Повертаємо шлях до обраного файлу
 	xlsx.FilePath = syscall.UTF16ToString(fileBuf[:n])
 
-	// Відкриття файлу з ШПС в форматі Excel
+	// Відкриття файлу даних в форматі Excel
 	xlsx.Data, err = LoadExcelFile(xlsx.FilePath)
 	if err != nil {
 		return xlsx, err
@@ -140,6 +135,7 @@ func IsShooter(division string) bool {
 	}
 	return false
 }
+
 // IsCompanyManager - Перевірка, чи відповідає рядок з даними підрозділу регулярному виразу для управління роти
 func IsCompanyManager(division string) bool {
 	pattern := regexp.MustCompile(`^упр\ (1|2|3|4)\/3 бо$`)
@@ -277,7 +273,7 @@ func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
 				}
 
 				if _, ok := shpk_data[cleaned_name]; ok {
-						log.Print("Для цієї персони дані вже збережено:", cleaned_name)
+					log.Print("Для цієї персони дані вже збережено:", cleaned_name)
 				} else {
 					shpk_data[cleaned_name] = Person{
 						Department:   department,
@@ -297,16 +293,3 @@ func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
 	}
 	return shpk_data, err_shpk
 }
-
-// SetRowHeightXlsx - Встановлює висоту рядка в файлі excelize.File, зберігши інші властивості
-func SetRowHeightXlsx(f *excelize.File, sheet string, row int, height float64, txt string) error {
-	wrap_lines := len(strings.Fields(txt))
-	if wrap_lines == 1 {
-		return nil
-	}
-	required_height := (float64(wrap_lines)) * height
-	err_height := f.SetRowHeight(sheet, row, required_height)
-
-	return err_height
-}
-
