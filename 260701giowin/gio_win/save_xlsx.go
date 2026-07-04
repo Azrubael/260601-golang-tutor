@@ -120,7 +120,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	reportData = append(reportData, tableHat)
 
 	// Додаємо в таблицю звіту лічильників розподілу
-	for _, element := range ppd_report_list {
+	for _, element := range PPD_report_list {
 		dist := (*ppd_counter_ptr)[element]
 		dataRow := []string{
 			element,
@@ -137,7 +137,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	// Створюємо список особового складу за призначенням
 	for r, assignment := range *ppd_list_ptr {
 		reportData = append(reportData, emptyRow)
-		dataRow := []string{"", "", "", "", ppd_report_list[r]}
+		dataRow := []string{"", "", "", "", PPD_report_list[r]}
 		reportData = append(reportData, dataRow)
 		for i, person := range assignment {
 			dataRow = []string{"", "", "", "", "", strconv.Itoa(i),
@@ -263,8 +263,8 @@ func UpdateDistributionBO(
 	sheetName := "3БО"
 	distribMatrix := [][]int{}
 	distribLine := []int{}
-	for _, comp := range comp_list {
-		for _, brl := range bo_report_list {
+	for _, comp := range COMP_list {
+		for _, brl := range BO_report_list {
 			el := boReportCounter[comp][brl]
 			distribLine = append(distribLine,
 				el.Offi, el.Serg, el.Sold,

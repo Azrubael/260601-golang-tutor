@@ -1,22 +1,24 @@
-package gio_win
+package gio_win_test
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/Azrubael/260601-golang-tutor/260701giowin/gio_win"
 )
 
 // TestReadShpkFile - тестування функції ReadShpkFile
 func TestReadShpkFile(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
+	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
 	} else {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
 
-	shpk_table, err := ReadShpkData(&shpk)
+	shpk_table, err := gio_win.ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
@@ -47,53 +49,54 @@ func TestReadShpkFile(t *testing.T) {
 // TestPrepareReportPPD - тестування функції PrepareReportPPD
 func TestPrepareReportPPD(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
+	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
 	} else {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
 
-	shpk_table, err := ReadShpkData(&shpk)
+	shpk_table, err := gio_win.ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
-	counter, _, err_msg := PrepareReportPPD(shpk_table)
+	counter, _, err_msg := gio_win.PrepareReportPPD(shpk_table)
 	if len(err_msg) != 0 {
 		fmt.Printf("Помилка створення звіту: %v\n", err)
 	}
-	l := len(ppd_report_list)
+	l := len(gio_win.PPD_report_list)
 	fmt.Println("=== Report ===")
 	fmt.Printf("Кількість людей в ШПС: %d\n", len(shpk_table))
 	for key, d := range counter {
 		fmt.Printf("%q: Offi=%d Serg=%d Sold=%d Total=%d\n",
 			key, d.Offi, d.Serg, d.Sold, d.Total)
 	}
-	fmt.Printf("Кількість людей після обробки: %d\n", counter[ppd_report_list[l-1]].Total)
+	fmt.Printf("Кількість людей після обробки: %d\n",
+	counter[gio_win.PPD_report_list[l-1]].Total)
 }
 
 // TestPrepareReportBO - тестування функції PrepareReportBO
 func TestPrepareReportBO(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpk, err := OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
+	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
 	} else {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
 	}
-	shpk_table, err := ReadShpkData(&shpk)
+	shpk_table, err := gio_win.ReadShpkData(&shpk)
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
-	boReportCounter, err_count := PrepareReportBO(shpk_table)
+	boReportCounter, err_count := gio_win.PrepareReportBO(shpk_table)
 	if len(err_count) != 0 {
 		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n", err)
 	}
 
-	for i := range bo_report_list {
-		fmt.Println("=== Report ===", bo_report_list[i])
-		for _, c := range comp_list {
-			fmt.Println(c, "\t", boReportCounter[c][bo_report_list[i]])
+	for i := range gio_win.BO_report_list {
+		fmt.Println("=== Report ===", gio_win.BO_report_list[i])
+		for _, c := range gio_win.COMP_list {
+			fmt.Println(c, "\t", boReportCounter[c][gio_win.BO_report_list[i]])
 		}
 	}
 }

@@ -1,7 +1,7 @@
 # Prepare the environment
 
 ```powershell
-go mod init "github.com/Azrubael/260601-golang-tutor/260626giowin"
+go mod init "github.com/Azrubael/260601-golang-tutor/260701giowin"
 go mod tidy
 ```
 
@@ -57,22 +57,40 @@ set PKG_CONFIG=pkg-config
 ```
 
 
-## To run the tests for all included packages:
+## To run the tests for all the module`s code:
 ```pwsh
 go test -v ./...
 ```
 
-## To test the package `gio_win`
+## To test all the code of the package `gio_win`
 ```pwsh
 go test -v ./gio_win
 ```
 
-## To run tests and generate coverage profile
+## To run tests and generate coverage profile of the package `gio_win`
 ```pwsh
 go test -coverprofile=coverage.out -v ./gio_win
 ```
 
-## To run an exact test function `TestOpenFileXlsx` in the package `gio_win`
+## To run tests from the `gio_win_test` package
 ```pwsh
-go test -run ^TestOpenFileXlsx$ -v ./gio_win
+go test -v ./gio_win/gio_win_test
+```
+
+## To run an exact test function `TestReadShpkFile` in the package `gio_win`
+```pwsh
+go clean -testcache
+go test -run -v ^TestReadShpkFile$ -v ./gio_win
+```
+    OR
+```pwsh
+go clean -testcache
+go test -v -run ^TestReadShpkFile$ ./gio_win/gio_win_test
+go test -v -run ^TestPrepareReportPPD$ ./gio_win/gio_win_test
+```
+
+#### To check all the list of the test files:
+```pwsh
+Get-ChildItem -Recurse -Filter "*_test.go"
+go list -f "{{.TestGoFiles}}" ./gio_win/gio_win_test
 ```

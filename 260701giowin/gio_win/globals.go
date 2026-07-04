@@ -102,7 +102,7 @@ var (
 )
 
 // ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
-var ppd_report_list []string = []string{
+var PPD_report_list []string = []string{
 	"ППД",
 	"Відпустка",
 	"Шпиталь",
@@ -112,7 +112,7 @@ var ppd_report_list []string = []string{
 }
 
 // bo_report_list - Перелік категорій, за якими ведеться розподіл особового складу по підрозділам всієї частини
-var bo_report_list []string = []string{
+var BO_report_list []string = []string{
 	"Загалом",
 	"Відпустка",
 	"Шпиталь",
@@ -125,7 +125,7 @@ var bo_report_list []string = []string{
 }
 
 // comp_list - Впорядкований список підрозділів
-var comp_list []string = []string{
+var COMP_list []string = []string{
 	"упр 3 бо",
 	"1",
 	"2",
