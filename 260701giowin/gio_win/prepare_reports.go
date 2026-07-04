@@ -3,10 +3,11 @@ package gio_win
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
-// MakeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу
-func MakeListOfCompanies(list []string) map[string]Distribution {
+// makeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу int(0)
+func makeListOfCompanies(list []string) map[string]Distribution {
 	companyDist := make(map[string]Distribution, len(list))
 	for _, name := range list {
 		companyDist[name] = Distribution{}
@@ -14,7 +15,7 @@ func MakeListOfCompanies(list []string) map[string]Distribution {
 	return companyDist
 }
 
-// incrementRankCount - increments the appropriate rank counter in Distribution
+// incrementRankCount - інкрементує відповідні лічильники в структурі Disribution
 func incrementRankCount(dist *Distribution, rank string) {
 	getRankCategory := ""
 	switch true {
@@ -49,11 +50,45 @@ func categorizePPD(
 	counters[key] = dist
 }
 
+// incRankCount - increments the appropriate rank counter in Distribution
+func incRankCount(dist *Distribution, rank string) *Distribution {
+	getRankCategory := ""
+	switch true {
+	case strings.HasSuffix(rank, "олдат"):
+		getRankCategory = "Sold"
+	case strings.HasSuffix(rank, "ержант"):
+		getRankCategory = "Serg"
+	default:
+		getRankCategory = "Offi"
+	}
+	switch getRankCategory {
+	case "Sold":
+		dist.Sold++
+	case "Serg":
+		dist.Serg++
+	case "Offi":
+		dist.Offi++
+	}
+	dist.Total++
+
+	return dist
+}
+
+// categPPD - додає персону до відповідного списку і збільшує лічильники
+func categPPD(
+	person ShortPersData,
+	list *[]ShortPersData,
+	counter *Distribution,
+	) *Distribution {
+	*list = append(*list, person)
+	return incRankCount(counter, person.Rank)
+}
+
 // PrepareReportPPD - Підготовка скороченого звіту для ППД
 func PrepareReportPPD(shpk_data map[string]Person) (
 	map[string]Distribution, [][]ShortPersData, []string) {
 
-	ppdReportCounter := make(map[string]Distribution, len(PPD_report_list))
+	ppdReportCounter := makeListOfCompanies(PPD_report_list)
 	count_err := []string{}
 
 	ppd_list := []ShortPersData{}
@@ -61,10 +96,6 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 	hosp_list := []ShortPersData{}
 	szch_list := []ShortPersData{}
 	asmt_list := []ShortPersData{}
-
-	for _, key := range PPD_report_list {
-		ppdReportCounter[key] = Distribution{}
-	}
 
 	if len(shpk_data) == 0 {
 		count_err = append(count_err, "Потрібні дані ШПК не зчитано з файлу.")
@@ -78,6 +109,7 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 			Company:    shpk_attr.Company,
 		}
 
+		// dist - допоміжна змінна для рахунку спискової кількості
 		dist := ppdReportCounter[PPD_report_list[5]]
 		incrementRankCount(&dist, person.Rank)
 		ppdReportCounter[PPD_report_list[5]] = dist
@@ -136,10 +168,7 @@ func PrepareReportBO(shpk_data map[string]Person) (
 
 	// Заповнюємо boReportCounter нулями
 	for _, c := range COMP_list {
-		boReportCounter[c] = make(map[string]Distribution, len(BO_report_list))
-		for _, d := range BO_report_list {
-			boReportCounter[c][d] = Distribution{}
-		}
+		boReportCounter[c] = makeListOfCompanies(BO_report_list)
 	}
 
 	for name, shpk_attr := range shpk_data {
@@ -238,11 +267,59 @@ func PrepareReportBO(shpk_data map[string]Person) (
 	return boReportCounter, count_err
 }
 
+// PrepareVacationReport1 - Підготовка даних для звіту стосовно відгуляних перших частин щорічної відпустки
 func PrepareVacationReport1(shpk_data map[string]Person) (
-	map[string]Distribution, []string) {
+	VacReport1 [][]string, count_err []string) {
 
-	vac1ReportCounter := make(map[string]Distribution, len(COMP_list))
-	count_err := []string{}
 
-	return vac1ReportCounter, count_err
+	// totalCounter - Для визначення спискової кількості людей
+	totalCounter := makeListOfCompanies(COMP_list)
+	// vac1ReportCounter - для звіту по відгуляним відпусткам 1 черги
+	vac1ReportCounter := makeListOfCompanies(COMP_list)
+
+	var aux Distribution
+	for name, shpk_attr := range shpk_data {
+		person := ShortPersData{
+			Name:       name,
+			Department: shpk_attr.Department,
+			Rank:       shpk_attr.Rank,
+			Company:    shpk_attr.Company,
+		}
+
+		// Рахунок  загальної спискової кількості
+		aux = totalCounter[COMP_list[9]]
+		totalCounter[COMP_list[9]] = *(incRankCount(&aux, person.Rank))
+
+		// Рахунок спискової кількості по підрозділам
+		aux = totalCounter[person.Company]
+		totalCounter[person.Company] = *(incRankCount(&aux, person.Rank))
+
+		// Рахунок тих, что відгуляв першу частину відпустки
+		if shpk_attr.Vacation1 != "" {
+			aux = vac1ReportCounter[person.Company]
+			vac1ReportCounter[person.Company] = *(incRankCount(&aux, person.Rank))
+		}
+	}
+
+	now := time.Now()
+	dateTime := now.Format("02.01.2006")
+	firstLineText := fmt.Sprintf("Кількість особового складу 3бо, що відгуляла першу частину щорічної відпустки станом на %v", dateTime)
+	VacReport1 = append(VacReport1, []string{firstLineText, "", "", ""})
+	VacReport1 = append(VacReport1, []string{"Підрозділ", "За списком", "Відгуляли", "Процент"})
+
+	for _, cl := range COMP_list{
+		fmt.Println(cl)
+		t := totalCounter[cl]
+		v := vac1ReportCounter[cl]
+		colB := fmt.Sprintf("%d (%d-%d-%d)", t.Total, t.Offi, t.Serg, t.Sold)
+		colC := fmt.Sprintf("%d (%d-%d-%d)", v.Total, v.Offi, v.Serg, v.Sold)
+		colD := "100.00 "
+		if t.Total > 0 {
+			percent := 100.0 * float32(v.Total) / float32(t.Total)
+			colD = fmt.Sprintf("%.2f ", percent)
+		}
+		VacReport1 = append(VacReport1, []string{cl, colB, colC, colD})
+	}
+
+	return VacReport1, count_err
 }

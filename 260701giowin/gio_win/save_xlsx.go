@@ -48,8 +48,8 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 }
 
 // saveXlsxFile - Функція для типового запису файлу *.xlsx на жорсткий диск
-func saveXlsxFile(xlsxPtr *xlsxData,
-	defaultPath string) (factFilepath string, err error) {
+func saveXlsxFile(xlsxPtr *xlsxData, defaultPath string) (
+	factFilepath string, err error) {
 
 	if xlsxPtr == nil {
 		err_arg := fmt.Errorf("Дані прототипу розподілу особового не передано до 'saveXlsxFile()'!\n")

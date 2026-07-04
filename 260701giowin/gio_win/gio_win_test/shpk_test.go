@@ -68,7 +68,7 @@ func TestPrepareReportPPD(t *testing.T) {
 	fmt.Println("=== Report ===")
 	fmt.Printf("Кількість людей в ШПС: %d\n", len(shpk_table))
 	for key, d := range counter {
-		fmt.Printf("%q: Offi=%d Serg=%d Sold=%d Total=%d\n",
+		fmt.Printf("%-15s: Offi=%-7d\tSerg=%-7d\tSold=%-7d\tTotal=%-7d\n",
 			key, d.Offi, d.Serg, d.Sold, d.Total)
 	}
 	fmt.Printf("Кількість людей після обробки: %d\n",
@@ -80,6 +80,32 @@ func TestPrepareReportBO(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
 	if err != nil {
+		t.Fatalf("Помилка читання ШПС в файлі %s:\n%v", filepath, err)
+	} else {
+		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
+	}
+	shpk_table, err := gio_win.ReadShpkData(&shpk)
+	if err != nil {
+		t.Fatalf("Помилка читання ШПС в файлі %s:\n%v", shpk.FilePath, err)
+	}
+	boReportCounter, err_count := gio_win.PrepareReportBO(shpk_table)
+	if len(err_count) != 0 {
+		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу:\n%v", err)
+	}
+
+	for i := range gio_win.BO_report_list {
+		fmt.Println("=== Report ===", gio_win.BO_report_list[i])
+		for _, c := range gio_win.COMP_list {
+			fmt.Println(c, "\t", boReportCounter[c][gio_win.BO_report_list[i]])
+		}
+	}
+}
+
+// TestPrepareVacationReport1
+func TestPrepareVacationReport1(t *testing.T) {
+		filepath := "d:/tmp/ШПС-T0320_.xlsx"
+	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
+	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", filepath, err)
 	} else {
 		fmt.Printf("Прочитаний файл %s містить %s\n", filepath, reflect.TypeOf(shpk))
@@ -88,15 +114,13 @@ func TestPrepareReportBO(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk.FilePath, err)
 	}
-	boReportCounter, err_count := gio_win.PrepareReportBO(shpk_table)
+
+	vac1, err_count := gio_win.PrepareVacationReport1(shpk_table)
 	if len(err_count) != 0 {
-		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n", err)
+		t.Fatalf("Помилка обробки даних для звіту по відпусткам:\n%v", err)
 	}
 
-	for i := range gio_win.BO_report_list {
-		fmt.Println("=== Report ===", gio_win.BO_report_list[i])
-		for _, c := range gio_win.COMP_list {
-			fmt.Println(c, "\t", boReportCounter[c][gio_win.BO_report_list[i]])
-		}
+	for _, row := range vac1 {
+		fmt.Printf("%-14s: %-14s\t%-14s\t%s%%\n", row[0], row[1], row[2], row[3])
 	}
 }
