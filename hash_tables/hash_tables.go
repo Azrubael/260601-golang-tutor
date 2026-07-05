@@ -21,6 +21,15 @@ type bucketNode struct {
 	next *bucketNode
 }
 
+// Init - will create a bucket in each slot of the hash table
+func Init() *HashTable {
+	result := &HashTable{}
+	for i := range result.array {
+		result.array[i] = &bucket{}
+	}
+	return result
+}
+
 // Insert - will take a key and add it to the hash table array
 func (h *HashTable) Insert(key string) {
 	index := hash(key)
@@ -43,15 +52,6 @@ func (h *HashTable) Delete(key string) {
 			h.array[index].head = h.array[index].head.next
 		}
 		h.array[index].delete(key)
-}
-
-// Init - will create a bucket in each slot of the hash table
-func Init() *HashTable {
-	result := &HashTable{}
-	for i := range result.array {
-		result.array[i] = &bucket{}
-	}
-	return result
 }
 
 // insert - will take a key, kreate a node with the key and insert the node in the bucket
