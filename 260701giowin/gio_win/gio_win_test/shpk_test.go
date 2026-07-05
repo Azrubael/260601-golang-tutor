@@ -101,7 +101,7 @@ func TestPrepareReportBO(t *testing.T) {
 	}
 }
 
-// TestPrepareVacationReport1
+// TestPrepareVacationReport1 - тестування функції PrepareVacationReport1
 func TestPrepareVacationReport1(t *testing.T) {
 		filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpk, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", filepath)
@@ -120,7 +120,21 @@ func TestPrepareVacationReport1(t *testing.T) {
 		t.Fatalf("Помилка обробки даних для звіту по відпусткам:\n%v", err)
 	}
 
-	for _, row := range vac1 {
-		fmt.Printf("%-14s: %-14s\t%-14s\t%s%%\n", row[0], row[1], row[2], row[3])
+	for i, row := range vac1 {
+		switch i {
+		case 0:
+			fmt.Println(row[0])
+		case 1:
+			fmt.Printf("%-14s %-14s\t%-14s\t%s\n", row[0], row[1], row[2], row[3])
+			for j := range 55 {
+				if j < 54 {
+					fmt.Print("-")
+				} else {
+					fmt.Println("-")
+				}
+			}
+		default:
+			fmt.Printf("%-14s: %-14s\t%-14s\t%s%%\n", row[0], row[1], row[2], row[3])
+		}
 	}
 }

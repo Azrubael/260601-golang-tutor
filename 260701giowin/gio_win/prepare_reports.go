@@ -15,45 +15,10 @@ func makeListOfCompanies(list []string) map[string]Distribution {
 	return companyDist
 }
 
-// incrementRankCount - інкрементує відповідні лічильники в структурі Disribution
-func incrementRankCount(dist *Distribution, rank string) {
+// incrementRankCount -інкрементує відповідні лічильники в структурі Disribution
+func incrementRankCount(dist *Distribution, rank string) *Distribution {
 	getRankCategory := ""
-	switch true {
-	case strings.HasSuffix(rank, "олдат"):
-		getRankCategory = "Sold"
-	case strings.HasSuffix(rank, "ержант"):
-		getRankCategory = "Serg"
-	default:
-		getRankCategory = "Offi"
-	}
-	switch getRankCategory {
-	case "Sold":
-		dist.Sold++
-	case "Serg":
-		dist.Serg++
-	case "Offi":
-		dist.Offi++
-	}
-	dist.Total++
-}
-
-// categorizePPD - adds person to appropriate list and updates counter
-func categorizePPD(
-	person ShortPersData,
-	list *[]ShortPersData,
-	counters map[string]Distribution,
-	key string,
-) {
-	*list = append(*list, person)
-	dist := counters[key]
-	incrementRankCount(&dist, person.Rank)
-	counters[key] = dist
-}
-
-// incRankCount - increments the appropriate rank counter in Distribution
-func incRankCount(dist *Distribution, rank string) *Distribution {
-	getRankCategory := ""
-	switch true {
+	switch {
 	case strings.HasSuffix(rank, "олдат"):
 		getRankCategory = "Sold"
 	case strings.HasSuffix(rank, "ержант"):
@@ -74,14 +39,14 @@ func incRankCount(dist *Distribution, rank string) *Distribution {
 	return dist
 }
 
-// categPPD - додає персону до відповідного списку і збільшує лічильники
-func categPPD(
+// categorizePPD - додає персону до відповідного списку і збільшує лічильники
+func categorizePPD(
 	person ShortPersData,
 	list *[]ShortPersData,
 	counter *Distribution,
 	) *Distribution {
 	*list = append(*list, person)
-	return incRankCount(counter, person.Rank)
+	return incrementRankCount(counter, person.Rank)
 }
 
 // PrepareReportPPD - Підготовка скороченого звіту для ППД
@@ -101,6 +66,8 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 		count_err = append(count_err, "Потрібні дані ШПК не зчитано з файлу.")
 		return ppdReportCounter, [][]ShortPersData{}, count_err
 	}
+
+	var aux Distribution
 	for name, shpk_attr := range shpk_data {
 		person := ShortPersData{
 			Name:       name,
@@ -110,43 +77,44 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 		}
 
 		// dist - допоміжна змінна для рахунку спискової кількості
-		dist := ppdReportCounter[PPD_report_list[5]]
-		incrementRankCount(&dist, person.Rank)
-		ppdReportCounter[PPD_report_list[5]] = dist
+		aux = ppdReportCounter[PPD_report_list[5]]
+		ppdReportCounter[PPD_report_list[5]] = *(incrementRankCount(&aux, person.Rank))
 
-		if shpk_attr.Assignment == "ППД" {
-			categorizePPD(person, &ppd_list, ppdReportCounter,
-				PPD_report_list[0])
-		} else if shpk_attr.Assignment != "" {
-			categorizePPD(person, &asmt_list, ppdReportCounter,
-				PPD_report_list[4])
-		}
-
-		if shpk_attr.Vacation_now != "" && shpk_attr.Assignment == "" {
-			categorizePPD(person, &vac_list, ppdReportCounter,
-				PPD_report_list[1])
-		} else if shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "" {
-			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
-			fmt.Println(err_msg)
-			count_err = append(count_err, err_msg)
-		}
-
-		if shpk_attr.Hospital != "" && shpk_attr.Assignment == "" {
-			categorizePPD(person, &hosp_list, ppdReportCounter,
-				PPD_report_list[2])
-		} else if shpk_attr.Hospital != "" && shpk_attr.Assignment != "" {
-			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
-			fmt.Println(err_msg)
-			count_err = append(count_err, err_msg)
-		}
-
-		if shpk_attr.Szch != "" && shpk_attr.Assignment == "" {
-			categorizePPD(person, &szch_list, ppdReportCounter,
-				PPD_report_list[3])
-		} else if shpk_attr.Szch != "" && shpk_attr.Assignment != "" {
+		switch {
+		case shpk_attr.Szch != "" && shpk_attr.Assignment != "":
 			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: лікування чи відрядження?", name)
 			fmt.Println(err_msg)
 			count_err = append(count_err, err_msg)
+
+		case shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "":
+			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
+			fmt.Println(err_msg)
+			count_err = append(count_err, err_msg)
+
+		case shpk_attr.Hospital != "" && shpk_attr.Assignment != "":
+			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
+			fmt.Println(err_msg)
+			count_err = append(count_err, err_msg)
+
+		case shpk_attr.Assignment == "ППД":
+			aux = ppdReportCounter[PPD_report_list[0]]
+			ppdReportCounter[PPD_report_list[0]] = *(categorizePPD(person, &ppd_list, &aux))
+
+		case  shpk_attr.Assignment != "":
+			aux = ppdReportCounter[PPD_report_list[4]]
+			ppdReportCounter[PPD_report_list[4]] = *(categorizePPD(person, &asmt_list, &aux))
+
+		case shpk_attr.Vacation_now != "" && shpk_attr.Assignment == "":
+			aux = ppdReportCounter[PPD_report_list[1]]
+			ppdReportCounter[PPD_report_list[1]] = *(categorizePPD(person, &vac_list, &aux))
+
+		case shpk_attr.Hospital != "" && shpk_attr.Assignment == "":
+			aux = ppdReportCounter[PPD_report_list[2]]
+			ppdReportCounter[PPD_report_list[2]] = *(categorizePPD(person, &hosp_list, &aux))
+
+		case shpk_attr.Szch != "" && shpk_attr.Assignment == "":
+			aux = ppdReportCounter[PPD_report_list[3]]
+			ppdReportCounter[PPD_report_list[3]] = *(categorizePPD(person, &szch_list, &aux))
 		}
 	}
 
@@ -191,7 +159,6 @@ func PrepareReportBO(shpk_data map[string]Person) (
 		boReportCounter[shpk_attr.Company][BO_report_list[0]] = dist
 
 		switch true {
-
 		case shpk_attr.Szch != "" && (shpk_attr.Assignment != "" ||
 			shpk_attr.Hospital != "" || shpk_attr.Vacation_now != "" || shpk_attr.Study != ""):
 			err_msg := fmt.Sprintf("Для %s одночасно є дані про СЗЧ і про наявність!", name)
@@ -271,7 +238,6 @@ func PrepareReportBO(shpk_data map[string]Person) (
 func PrepareVacationReport1(shpk_data map[string]Person) (
 	VacReport1 [][]string, count_err []string) {
 
-
 	// totalCounter - Для визначення спискової кількості людей
 	totalCounter := makeListOfCompanies(COMP_list)
 	// vac1ReportCounter - для звіту по відгуляним відпусткам 1 черги
@@ -288,16 +254,16 @@ func PrepareVacationReport1(shpk_data map[string]Person) (
 
 		// Рахунок  загальної спискової кількості
 		aux = totalCounter[COMP_list[9]]
-		totalCounter[COMP_list[9]] = *(incRankCount(&aux, person.Rank))
+		totalCounter[COMP_list[9]] = *(incrementRankCount(&aux, person.Rank))
 
 		// Рахунок спискової кількості по підрозділам
 		aux = totalCounter[person.Company]
-		totalCounter[person.Company] = *(incRankCount(&aux, person.Rank))
+		totalCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
 
 		// Рахунок тих, что відгуляв першу частину відпустки
 		if shpk_attr.Vacation1 != "" {
 			aux = vac1ReportCounter[person.Company]
-			vac1ReportCounter[person.Company] = *(incRankCount(&aux, person.Rank))
+			vac1ReportCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
 		}
 	}
 
