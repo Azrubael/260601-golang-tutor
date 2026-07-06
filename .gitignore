@@ -4,8 +4,8 @@ go.sum
 go_output.log
 az_env
 azwenv
-workflow
-.vscode
+**/workflow/
+# .vscode
 **/__pycache__/
 **/lib/
 **/lib64/
@@ -28,4 +28,4 @@ workflow
 .tox/
 __pycache__
 MANIFEST
-dist/
+**/dist/
