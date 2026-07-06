@@ -50,11 +50,11 @@ func categorizePPD(
 }
 
 // PrepareReportPPD - Підготовка скороченого звіту для ППД
-func PrepareReportPPD(shpk_data map[string]Person) (
+func PrepareReportPPD(shpkDataPtr *map[string]Person) (
 	map[string]Distribution, [][]ShortPersData, []string) {
 
 	ppdReportCounter := makeListOfCompanies(PPD_report_list)
-	count_err := []string{}
+	countErr := []string{}
 
 	ppd_list := []ShortPersData{}
 	vac_list := []ShortPersData{}
@@ -62,18 +62,18 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 	szch_list := []ShortPersData{}
 	asmt_list := []ShortPersData{}
 
-	if len(shpk_data) == 0 {
-		count_err = append(count_err, "Потрібні дані ШПК не зчитано з файлу.")
-		return ppdReportCounter, [][]ShortPersData{}, count_err
+	if len(*shpkDataPtr) == 0 {
+		countErr = append(countErr, "Потрібні дані ШПК не зчитано з файлу.")
+		return ppdReportCounter, [][]ShortPersData{}, countErr
 	}
 
 	var aux Distribution
-	for name, shpk_attr := range shpk_data {
+	for name, shpkAttr := range *shpkDataPtr {
 		person := ShortPersData{
 			Name:       name,
-			Department: shpk_attr.Department,
-			Rank:       shpk_attr.Rank,
-			Company:    shpk_attr.Company,
+			Department: shpkAttr.Department,
+			Rank:       shpkAttr.Rank,
+			Company:    shpkAttr.Company,
 		}
 
 		// dist - допоміжна змінна для рахунку спискової кількості
@@ -81,38 +81,38 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 		ppdReportCounter[PPD_report_list[5]] = *(incrementRankCount(&aux, person.Rank))
 
 		switch {
-		case shpk_attr.Szch != "" && shpk_attr.Assignment != "":
-			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: лікування чи відрядження?", name)
-			fmt.Println(err_msg)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Szch != "" && shpkAttr.Assignment != "":
+			errMsg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: лікування чи відрядження?", name)
+			fmt.Println(errMsg)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "":
-			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
-			fmt.Println(err_msg)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Vacation_now != "" && shpkAttr.Assignment != "":
+			errMsg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
+			fmt.Println(errMsg)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Hospital != "" && shpk_attr.Assignment != "":
-			err_msg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
-			fmt.Println(err_msg)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Hospital != "" && shpkAttr.Assignment != "":
+			errMsg := fmt.Sprintf("Потрібна перевірка актуального статусу для %s: відпустка чи відрядження?", name)
+			fmt.Println(errMsg)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Assignment == "ППД":
+		case shpkAttr.Assignment == "ППД":
 			aux = ppdReportCounter[PPD_report_list[0]]
 			ppdReportCounter[PPD_report_list[0]] = *(categorizePPD(person, &ppd_list, &aux))
 
-		case  shpk_attr.Assignment != "":
+		case  shpkAttr.Assignment != "":
 			aux = ppdReportCounter[PPD_report_list[4]]
 			ppdReportCounter[PPD_report_list[4]] = *(categorizePPD(person, &asmt_list, &aux))
 
-		case shpk_attr.Vacation_now != "" && shpk_attr.Assignment == "":
+		case shpkAttr.Vacation_now != "" && shpkAttr.Assignment == "":
 			aux = ppdReportCounter[PPD_report_list[1]]
 			ppdReportCounter[PPD_report_list[1]] = *(categorizePPD(person, &vac_list, &aux))
 
-		case shpk_attr.Hospital != "" && shpk_attr.Assignment == "":
+		case shpkAttr.Hospital != "" && shpkAttr.Assignment == "":
 			aux = ppdReportCounter[PPD_report_list[2]]
 			ppdReportCounter[PPD_report_list[2]] = *(categorizePPD(person, &hosp_list, &aux))
 
-		case shpk_attr.Szch != "" && shpk_attr.Assignment == "":
+		case shpkAttr.Szch != "" && shpkAttr.Assignment == "":
 			aux = ppdReportCounter[PPD_report_list[3]]
 			ppdReportCounter[PPD_report_list[3]] = *(categorizePPD(person, &szch_list, &aux))
 		}
@@ -124,14 +124,14 @@ func PrepareReportPPD(shpk_data map[string]Person) (
 		hosp_list,
 		szch_list,
 		asmt_list}
-	return ppdReportCounter, reportList, count_err
+	return ppdReportCounter, reportList, countErr
 }
 
 // PrepareReportBO - Підготовка розгорнутого звіту по всьому підрозділу
-func PrepareReportBO(shpk_data map[string]Person) (
+func PrepareReportBO(shpkDataPtr *map[string]Person) (
 	map[string]map[string]Distribution, []string) {
 
-	count_err := []string{}
+	countErr := []string{}
 	boReportCounter := make(map[string]map[string]Distribution, len(COMP_list))
 
 	// Заповнюємо boReportCounter нулями
@@ -139,78 +139,78 @@ func PrepareReportBO(shpk_data map[string]Person) (
 		boReportCounter[c] = makeListOfCompanies(BO_report_list)
 	}
 
-	for name, shpk_attr := range shpk_data {
+	for name, shpkAttr := range *shpkDataPtr {
 		switch true {
 		case name == "" || name == " ":
-			err_msg := fmt.Sprintf(
+			errMsg := fmt.Sprintf(
 				"Відсутні дані стосовно імені для особи, що має звання %s в підрозділі %s",
-				shpk_attr.Rank, shpk_attr.Department)
-			count_err = append(count_err, err_msg)
-		case shpk_attr.Rank == ""|| shpk_attr.Rank == " ":
-			err_msg := fmt.Sprintf("Для %s відсутні дані стосовно звання", name)
-			count_err = append(count_err, err_msg)
-		case shpk_attr.Company == ""|| shpk_attr.Company == " ":
-			err_msg := fmt.Sprintf("Для %s відсутні дані стосовно підрозділу", name)
-			count_err = append(count_err, err_msg)
+				shpkAttr.Rank, shpkAttr.Department)
+			countErr = append(countErr, errMsg)
+		case shpkAttr.Rank == ""|| shpkAttr.Rank == " ":
+			errMsg := fmt.Sprintf("Для %s відсутні дані стосовно звання", name)
+			countErr = append(countErr, errMsg)
+		case shpkAttr.Company == ""|| shpkAttr.Company == " ":
+			errMsg := fmt.Sprintf("Для %s відсутні дані стосовно підрозділу", name)
+			countErr = append(countErr, errMsg)
 		}
 
-		dist := boReportCounter[shpk_attr.Company][BO_report_list[0]]
-		incrementRankCount(&dist, shpk_attr.Rank)
-		boReportCounter[shpk_attr.Company][BO_report_list[0]] = dist
+		dist := boReportCounter[shpkAttr.Company][BO_report_list[0]]
+		incrementRankCount(&dist, shpkAttr.Rank)
+		boReportCounter[shpkAttr.Company][BO_report_list[0]] = dist
 
 		switch true {
-		case shpk_attr.Szch != "" && (shpk_attr.Assignment != "" ||
-			shpk_attr.Hospital != "" || shpk_attr.Vacation_now != "" || shpk_attr.Study != ""):
-			err_msg := fmt.Sprintf("Для %s одночасно є дані про СЗЧ і про наявність!", name)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Szch != "" && (shpkAttr.Assignment != "" ||
+			shpkAttr.Hospital != "" || shpkAttr.Vacation_now != "" || shpkAttr.Study != ""):
+			errMsg := fmt.Sprintf("Для %s одночасно є дані про СЗЧ і про наявність!", name)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Vacation_now != "" && shpk_attr.Assignment != "":
-			err_msg := fmt.Sprintf("Для %s одночасно є дані про відрядження і про відпустку!", name)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Vacation_now != "" && shpkAttr.Assignment != "":
+			errMsg := fmt.Sprintf("Для %s одночасно є дані про відрядження і про відпустку!", name)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Hospital != "" && (shpk_attr.Assignment != "" || shpk_attr.Vacation_now != "" || shpk_attr.Study != ""):
-			err_msg := fmt.Sprintf("Для %s одночасно є дані про лікування і про наявність!", name)
-			count_err = append(count_err, err_msg)
+		case shpkAttr.Hospital != "" && (shpkAttr.Assignment != "" || shpkAttr.Vacation_now != "" || shpkAttr.Study != ""):
+			errMsg := fmt.Sprintf("Для %s одночасно є дані про лікування і про наявність!", name)
+			countErr = append(countErr, errMsg)
 
-		case shpk_attr.Assignment == "ППД":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[8]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[8]] = dist
+		case shpkAttr.Assignment == "ППД":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[8]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[8]] = dist
 
-		case shpk_attr.Szch != "":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[7]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[7]] = dist
+		case shpkAttr.Szch != "":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[7]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[7]] = dist
 
-		case shpk_attr.Assignment == "ВОП":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[6]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[6]] = dist
+		case shpkAttr.Assignment == "ВОП":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[6]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[6]] = dist
 
-		case shpk_attr.Assignment == "КСП":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[5]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[5]] = dist
+		case shpkAttr.Assignment == "КСП":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[5]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[5]] = dist
 
-		case shpk_attr.Assignment != "":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[4]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[4]] = dist
+		case shpkAttr.Assignment != "":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[4]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[4]] = dist
 
-		case shpk_attr.Study != "":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[3]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[3]] = dist
+		case shpkAttr.Study != "":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[3]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[3]] = dist
 
-		case shpk_attr.Hospital != "":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[2]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[2]] = dist
+		case shpkAttr.Hospital != "":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[2]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[2]] = dist
 
-		case shpk_attr.Vacation_now != "":
-			dist := boReportCounter[shpk_attr.Company][BO_report_list[1]]
-			incrementRankCount(&dist, shpk_attr.Rank)
-			boReportCounter[shpk_attr.Company][BO_report_list[1]] = dist
+		case shpkAttr.Vacation_now != "":
+			dist := boReportCounter[shpkAttr.Company][BO_report_list[1]]
+			incrementRankCount(&dist, shpkAttr.Rank)
+			boReportCounter[shpkAttr.Company][BO_report_list[1]] = dist
 		}
 	}
 
@@ -231,25 +231,27 @@ func PrepareReportBO(shpk_data map[string]Person) (
 		}
 	}
 
-	return boReportCounter, count_err
+	return boReportCounter, countErr
 }
 
 // PrepareVacationReport1 - Підготовка даних для звіту стосовно відгуляних перших частин щорічної відпустки
-func PrepareVacationReport1(shpk_data map[string]Person) (
-	VacReport1 [][]string, count_err []string) {
+func PrepareVacationReport1(shpkDataPtr *map[string]Person) (
+	*[][]string, []string) {
 
+	VacReport1 := [][]string{}
+	countErr := []string{}
 	// totalCounter - Для визначення спискової кількості людей
 	totalCounter := makeListOfCompanies(COMP_list)
 	// vac1ReportCounter - для звіту по відгуляним відпусткам 1 черги
 	vac1ReportCounter := makeListOfCompanies(COMP_list)
 
 	var aux Distribution
-	for name, shpk_attr := range shpk_data {
+	for name, shpkAttr := range *shpkDataPtr {
 		person := ShortPersData{
 			Name:       name,
-			Department: shpk_attr.Department,
-			Rank:       shpk_attr.Rank,
-			Company:    shpk_attr.Company,
+			Department: shpkAttr.Department,
+			Rank:       shpkAttr.Rank,
+			Company:    shpkAttr.Company,
 		}
 
 		// Рахунок  загальної спискової кількості
@@ -261,7 +263,7 @@ func PrepareVacationReport1(shpk_data map[string]Person) (
 		totalCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
 
 		// Рахунок тих, что відгуляв першу частину відпустки
-		if shpk_attr.Vacation1 != "" {
+		if shpkAttr.Vacation1 != "" {
 			aux = vac1ReportCounter[person.Company]
 			vac1ReportCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
 		}
@@ -287,5 +289,5 @@ func PrepareVacationReport1(shpk_data map[string]Person) (
 		VacReport1 = append(VacReport1, []string{cl, colB, colC, colD})
 	}
 
-	return VacReport1, count_err
+	return &VacReport1, countErr
 }

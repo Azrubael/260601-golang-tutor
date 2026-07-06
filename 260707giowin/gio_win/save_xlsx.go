@@ -17,27 +17,33 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 	row int, colOffset int, values []T) error {
 
 	for i, v := range values {
+
 		colName, err := excelize.ColumnNumberToName(i + colOffset)
 		if err != nil {
 			return fmt.Errorf("invalid column number: %w", err)
 		}
 		cell := fmt.Sprintf("%s%d", colName, row)
-
-		// Заміна нульових значень на пусті рядка
 		var toWrite any
-		switch any(v).(type) {
+
+		// Заміна нульових значень на пусті рядки
+		switch val := any(v).(type) {
 		case int, int8, int16, int32, int64,
-			uint, uint8, uint16, uint32, uint64,
-			float32, float64:
+			uint, uint8, uint16, uint32, uint64:
 			if fmt.Sprintf("%v", v) == "0" {
 				toWrite = ""
 			} else {
-				toWrite = v
+				toWrite = val
+			}
+		case float32, float64:
+			if z := fmt.Sprintf("%v", v); z == "0.0" || z == "0,0" || z == "0" {
+				toWrite = ""
+			} else {
+				toWrite = val
 			}
 		case string:
-				toWrite = v
+			toWrite = val
 		default:
-			toWrite = fmt.Sprintf("%v", v)
+			toWrite = fmt.Sprintf("%v", val)
 		}
 
 		if err = f.SetCellValue(sheet, cell, toWrite); err != nil {
@@ -47,7 +53,7 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 	return nil
 }
 
-// saveXlsxFile - Функція для типового запису файлу *.xlsx на жорсткий диск
+// saveXlsxFile - Функція для  запису типового файлу *.xlsx на жорсткий диск
 func saveXlsxFile(xlsxPtr *xlsxData, defaultPath string) (
 	factFilepath string, err error) {
 
@@ -219,11 +225,12 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 			width = 15.0
 		} else {
 			width = float64(maxLen) + 2.0
-
 		}
+
 		if width < 10 {
 			width = 10
 		}
+
 		if err := xlsx.SetColWidth(sheetName, colName, colName, width); err != nil {
 			log.Println("Помилка вирівнювання колонок по ширині: ", err)
 			return "", err
@@ -232,10 +239,10 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 
 	// Зберігаємо дані в файл
 	var xlsxFile = xlsxData{
-		Data : xlsx,
-		FilePath : pathReportPPD,
+		Data:     xlsx,
+		FilePath: pathReportPPD,
 	}
-	factFilepath, err_save := saveXlsxFile(&xlsxFile,	"d:/tmp/звіт_ППД.xlsx")
+	factFilepath, err_save := saveXlsxFile(&xlsxFile, "d:/tmp/звіт_ППД.xlsx")
 	if err_save != nil {
 		log.Println(err_save)
 		return factFilepath, err_save
@@ -286,7 +293,7 @@ func UpdateDistributionBO(
 	}
 
 	// Зберігаємо дані в файл
-	factFilepath, err_save := saveXlsxFile(bo_xlsx_ptr,	"d:/tmp/3бо.xlsx")
+	factFilepath, err_save := saveXlsxFile(bo_xlsx_ptr, "d:/tmp/3бо.xlsx")
 	if err_save != nil {
 		log.Println(err_save)
 		return factFilepath, err_save
@@ -294,7 +301,7 @@ func UpdateDistributionBO(
 	return factFilepath, nil
 }
 
-func SaveVacationReport1() string {
+func SaveVacationReport1(VacReport1_ptr *[][]string) string {
 	// fmt.Println("SaveVacationReport1() called")
 	return "SaveVacationReport1() called"
 }

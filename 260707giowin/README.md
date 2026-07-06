@@ -1,7 +1,7 @@
 # Prepare the environment
 
 ```powershell
-go mod init "github.com/Azrubael/260601-golang-tutor/260701giowin"
+go mod init "github.com/Azrubael/260601-golang-tutor/260707giowin"
 go mod tidy
 ```
 

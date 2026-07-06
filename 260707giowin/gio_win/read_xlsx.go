@@ -23,19 +23,21 @@ func LoadExcelFile(filePath string) (*excelize.File, error) {
 }
 
 // OpenFileXlsx - Відкриття діалогового вікна для вибору файлу Excel
-func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
+func OpenFileXlsx(title string, filePath string) (*xlsxData, error) {
 	filterPairs := []string{
 		"Excel files (*.xlsx)", "*.xlsx",
 		"All files (*.*)", "*.*",
 	}
 
+	var xlsx xlsxData
+	var err error
 	if filePath != "" {
 		xlsx.Data, err = LoadExcelFile(filePath)
 		xlsx.FilePath = filePath
 		if err != nil {
-			return xlsx, err
+			return &xlsx, err
 		}
-		return xlsx, nil
+		return &xlsx, nil
 	}
 
 	const (
@@ -52,14 +54,14 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 	for i := 0; i+1 < len(filterPairs); i += 2 {
 		a, err := windows.UTF16FromString(filterPairs[i])
 		if err != nil {
-			return xlsx, err
+			return &xlsx, err
 		}
 		filters16 = append(filters16, a...)
 		filters16 = append(filters16, 0)
 
 		b, err := windows.UTF16FromString(filterPairs[i+1])
 		if err != nil {
-			return xlsx, err
+			return &xlsx, err
 		}
 		filters16 = append(filters16, b...)
 		filters16 = append(filters16, 0)
@@ -68,7 +70,7 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 
 	title16, err := windows.UTF16FromString(title)
 	if err != nil {
-		return xlsx, err
+		return &xlsx, err
 	}
 
 	fileBuf := make([]uint16, MAX_PATH)
@@ -87,13 +89,13 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 	if ret == 0 {
 		// скасовано
 		if err_call == windows.ERROR_SUCCESS {
-			return xlsx, nil
+			return &xlsx, nil
 		}
 		// помилка
 		if err_call != nil && err_call != windows.ERROR_SUCCESS {
-			return xlsx, err_call
+			return &xlsx, err_call
 		}
-		return xlsx, nil
+		return &xlsx, nil
 	}
 	// перетворюємо UTF-16 до Go рядка (до першого 0)
 	n := 0
@@ -106,9 +108,9 @@ func OpenFileXlsx(title string, filePath string) (xlsx xlsxData, err error) {
 	// Відкриття файлу даних в форматі Excel
 	xlsx.Data, err = LoadExcelFile(xlsx.FilePath)
 	if err != nil {
-		return xlsx, err
+		return &xlsx, err
 	}
-	return xlsx, nil
+	return &xlsx, nil
 }
 
 // ReadCellSafe - Безпечне отримання значення ячейки, з перевіркою чи вона існує
@@ -214,14 +216,14 @@ func getCompanyForManagement(division string) (string, error) {
 }
 
 // ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
-func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
+func ReadShpkData(shpkXlsxPtr *xlsxData) (*map[string]Person, error) {
 
-	if shpk_xlsx_ptr == nil {
-		msg := "Помилка: shpk_xlsx_ptr == nil"
+	if shpkXlsxPtr == nil {
+		msg := "Помилка: shpkXlsxPtr == nil"
 		log.Println(msg)
 		return nil, fmt.Errorf("%s", msg)
 	}
-	shpk := *shpk_xlsx_ptr
+	shpk := *shpkXlsxPtr
 
 	// Отримання таблиці даних ШПС у вигляді рядків
 	shpk_rows, err_shpk := shpk.Data.GetRows("ШПС")
@@ -291,5 +293,5 @@ func ReadShpkData(shpk_xlsx_ptr *xlsxData) (map[string]Person, error) {
 			}
 		}
 	}
-	return shpk_data, err_shpk
+	return &shpk_data, err_shpk
 }

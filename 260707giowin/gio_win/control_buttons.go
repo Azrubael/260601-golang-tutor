@@ -11,7 +11,7 @@ import (
 func handleButtonClicks(
 	gtx C,
 	BS BtnState,
-	shpk_xlsx_ptr, bo_xlsx_ptr *xlsxData,
+	shpkXlsxPtr, boXlsxPtr *xlsxData,
 	input_window *widget.Editor,
 	logger *log.Logger,
 ) (BtnState, string, string) {
@@ -21,6 +21,7 @@ func handleButtonClicks(
 		default_path_bo  = "d:/tmp/3бо.xlsx"      // Ім'я файлу для запису звіту ППД
 		text_in_window   = default_path_ppd
 		msg              = ""
+		shpkDataPtr = &SHPK_DATA
 	)
 
 	switch {
@@ -49,7 +50,7 @@ func handleButtonClicks(
 		BS.define_distrib = false
 		title_shpk := "Виберіть Excel файл ШПК"
 		err_shpk := error(nil)
-		*shpk_xlsx_ptr, err_shpk = OpenFileXlsx(title_shpk, "")
+		shpkXlsxPtr, err_shpk = OpenFileXlsx(title_shpk, "")
 		if err_shpk != nil || SHPK_XLSX.Data == nil {
 			msg = fmt.Sprintf("Помилка відкриття %s", SHPK_XLSX.FilePath)
 			logger.Printf("%s: %v\n", msg, err_shpk)
@@ -64,7 +65,7 @@ func handleButtonClicks(
 		BS.define_shpk = false
 		title_bo := "Виберіть Excel файл загального розподілу людей"
 		err_bo := error(nil)
-		*bo_xlsx_ptr, err_bo = OpenFileXlsx(title_bo, "")
+		boXlsxPtr, err_bo = OpenFileXlsx(title_bo, "")
 		if err_bo != nil || BO_XLSX.Data == nil {
 			msg = fmt.Sprintf("Помилка відкриття %s з даними розподілу людей",
 				BO_XLSX.FilePath)
@@ -81,31 +82,32 @@ func handleButtonClicks(
 		BS.refresh_distrib = false
 		BS.save_vacation = false
 		err_shpk := error(nil)
-		SHPK_DATA, err_shpk = ReadShpkData(shpk_xlsx_ptr)
+		shpkDataPtr, err_shpk = ReadShpkData(shpkXlsxPtr)
+		SHPK_DATA = *shpkDataPtr
 		if err_shpk != nil || SHPK_DATA == nil {
 			msg = fmt.Sprintf("Помилка перетворення даних ШПК в словник: %v\n", err_shpk)
 			logger.Println(msg)
-		} else {
-			msg = "Дані ШПК успішно перетворено з формату xlsx в словник."
-			logger.Println(msg)
-		}
+			} else {
+				msg = "Дані ШПК успішно перетворено з формату xlsx в словник."
+				logger.Println(msg)
+			}
 
-	case BS.prep_ppd_btn.Clicked(gtx):
-		logger.Println("Натиснуто кнопку: 'Записати звіт для стройової'.")
-		BS.prepare_ppd = !BS.prepare_ppd
-		BS.prepare_shpk = false
+		case BS.prep_ppd_btn.Clicked(gtx):
+			logger.Println("Натиснуто кнопку: 'Записати звіт для стройової'.")
+			BS.prepare_ppd = !BS.prepare_ppd
+			BS.prepare_shpk = false
 		BS.refresh_distrib = false
 		BS.save_vacation = false
 		if text_in_window != "" {
 			text_in_window = input_window.Text()
-		} else {
-			text_in_window = default_path_ppd
-			input_window.SetText(text_in_window)
-		}
-		logger.Println(text_in_window)
-		err_ppd := []string{}
-		PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(SHPK_DATA)
-		if len(err_ppd) != 0 || SHPK_DATA == nil {
+			} else {
+				text_in_window = default_path_ppd
+				input_window.SetText(text_in_window)
+			}
+			logger.Println(text_in_window)
+			err_ppd := []string{}
+			PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(shpkDataPtr)
+		if len(err_ppd) != 0 {
 			msg = fmt.Sprintf("Помилка підготовки звіту для ППД: %v", err_ppd)
 			logger.Println(msg)
 		} else {
@@ -134,7 +136,7 @@ func handleButtonClicks(
 			text_in_window = default_path_bo
 			input_window.SetText(text_in_window)
 		}
-		BO_COUNTER, err_bo_count := PrepareReportBO(SHPK_DATA)
+		BO_COUNTER, err_bo_count := PrepareReportBO(shpkDataPtr)
 		switch {
 		case len(err_bo_count) != 0:
 			msg = fmt.Sprintf("Помилка підготовки звіту для оновлення розподілу:\n%v",
@@ -148,7 +150,7 @@ func handleButtonClicks(
 			msg = "Дані успішно підготовлено для оновлення розподілу."
 			logger.Println(msg)
 		text_in_window, err_bo_upd := UpdateDistributionBO(BO_COUNTER,
-			bo_xlsx_ptr, default_path_bo)
+			boXlsxPtr, default_path_bo)
 		BO_XLSX.FilePath = text_in_window
 		if err_bo_upd != nil {
 			msg = fmt.Sprintf("Помилка збереження загального розподілу особового складу до файлу %s.",
@@ -166,7 +168,7 @@ func handleButtonClicks(
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false
 		BS.refresh_distrib = false
-		SaveVacationReport1()
+		SaveVacationReport1(nil)
 	}
 
 	return BS, text_in_window, msg
