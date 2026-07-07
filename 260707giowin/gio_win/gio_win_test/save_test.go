@@ -48,3 +48,34 @@ func TestUpdateReportBO(t *testing.T) {
 		savedFile)
 	}
 }
+
+
+// TestaveVacationReport1 - Тест запису звіту по відпусткам 1 черги
+func TestSaveVacationReport1(t *testing.T) {
+	shpk_filepath := "d:/tmp/ШПС-T0320_.xlsx"
+	shpkPtr, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", shpk_filepath)
+	if err != nil {
+		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk_filepath, err)
+	}
+
+	shpk_table, err := gio_win.ReadShpkData(shpkPtr)
+	if err != nil {
+		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpkPtr.FilePath, err)
+	}
+
+	vac1ReportPtr, err_count := gio_win.PrepareVacationReport1(shpk_table)
+	if len(err_count) != 0 {
+		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n",
+		err)
+	}
+
+	vac1ReportFile := "d:/tmp/відпустки1черга.xtxt"
+	savedFile, err_save := gio_win.SaveVacationReport1(vac1ReportPtr, vac1ReportFile)
+	if err_save != nil {
+		t.Fatalf("Помилка запису звіту про відпустки 1 черги до файлу %s:\n%v\n",
+		savedFile, err)
+	} else {
+		fmt.Println("Звіт про відпустки 1 черги можна прочитати в файлі:\n",
+		savedFile)
+	}
+}
