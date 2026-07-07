@@ -17,8 +17,9 @@ func handleButtonClicks(
 ) (BtnState, string, string) {
 
 	var (
-		default_path_ppd = "d:/tmp/звіт_ППД.xlsx" // Ім'я файлу для запису звіту ППД
-		default_path_bo  = "d:/tmp/3бо.xlsx"      // Ім'я файлу для запису звіту ППД
+		default_path_ppd = "d:/tmp/звіт_ППД.xlsx" // Звіт для ППД
+		default_path_bo  = "d:/tmp/3бо.xlsx"      // Звіт загального розподілу
+		default_path_vac1  = "d:/tmp/відпустки1черги.xlsx"  // Звіт по відпусткам
 		text_in_window   = default_path_ppd
 		msg              = ""
 		shpkDataPtr = &SHPK_DATA
@@ -51,6 +52,7 @@ func handleButtonClicks(
 		title_shpk := "Виберіть Excel файл ШПК"
 		err_shpk := error(nil)
 		shpkXlsxPtr, err_shpk = OpenFileXlsx(title_shpk, "")
+		SHPK_XLSX = *shpkXlsxPtr
 		if err_shpk != nil || SHPK_XLSX.Data == nil {
 			msg = fmt.Sprintf("Помилка відкриття %s", SHPK_XLSX.FilePath)
 			logger.Printf("%s: %v\n", msg, err_shpk)
@@ -100,6 +102,7 @@ func handleButtonClicks(
 		BS.save_vacation = false
 		if text_in_window != "" {
 			text_in_window = input_window.Text()
+			default_path_ppd = text_in_window
 			} else {
 				text_in_window = default_path_ppd
 				input_window.SetText(text_in_window)
@@ -108,7 +111,7 @@ func handleButtonClicks(
 			err_ppd := []string{}
 			PPD_COUNTER, PPD_LIST, err_ppd = PrepareReportPPD(shpkDataPtr)
 		if len(err_ppd) != 0 {
-			msg = fmt.Sprintf("Помилка підготовки звіту для ППД: %v", err_ppd)
+			msg = fmt.Sprintf("Помилка підготовки звіту для ППД: \n%v", err_ppd)
 			logger.Println(msg)
 		} else {
 			msg = "Дані ШПК успішно підготовлено для звіту ППД."
@@ -118,7 +121,7 @@ func handleButtonClicks(
 			text_in_window)
 		if err_ppd_save != nil {
 			msg = fmt.Sprintf("Помилка збереження звіту ППД до файлу %s", saved_file)
-			logger.Printf("%s: %v\n", msg, err_ppd_save)
+			logger.Printf("%s: \n%v\n", msg, err_ppd_save)
 		} else {
 			msg = fmt.Sprintf("Звіт для ППД успішно збережений до файлу\n%s.", saved_file)
 			logger.Println(msg)
@@ -132,6 +135,7 @@ func handleButtonClicks(
 		BS.save_vacation = false
 		if text_in_window != "" {
 			text_in_window = input_window.Text()
+			default_path_bo = text_in_window
 		} else {
 			text_in_window = default_path_bo
 			input_window.SetText(text_in_window)
@@ -155,7 +159,7 @@ func handleButtonClicks(
 		if err_bo_upd != nil {
 			msg = fmt.Sprintf("Помилка збереження загального розподілу особового складу до файлу %s.",
 				text_in_window)
-			logger.Printf("%s: %v\n",	msg, err_bo_upd)
+			logger.Printf("%s: \n%v\n",	msg, err_bo_upd)
 		} else {
 			msg = fmt.Sprintf("Загальний розподіл особового складу успішно оновлений і збережений до файлу %s.",
 				text_in_window)
@@ -168,7 +172,37 @@ func handleButtonClicks(
 		BS.prepare_shpk = false
 		BS.prepare_ppd = false
 		BS.refresh_distrib = false
-		SaveVacationReport1(nil)
+		if SHPK_XLSX.Data != nil {
+
+			Vac1ReportPtr, err_vac1 := PrepareVacationReport1(shpkDataPtr)
+			if err_vac1 != nil || *Vac1ReportPtr == nil {
+				msg = "Помилка обробки даних для звіту по 1 черзі відпусток!"
+				logger.Printf("%s: \n%v\n",	msg, err_vac1)
+			}
+
+			if text_in_window != "" {
+				text_in_window = input_window.Text()
+				default_path_vac1 = text_in_window
+			} else {
+				text_in_window = default_path_vac1
+				input_window.SetText(text_in_window)
+			}
+
+			vac1Filepath, err_save := SaveVacationReport1(Vac1ReportPtr,
+				default_path_vac1)
+			if err_save != nil {
+				msg = fmt.Sprintf("Помилка запису звіту по 1 черзі відпусток до файлу %s!",
+				vac1Filepath)
+				logger.Printf("%s: \n%v\n",	msg, err_vac1)
+			} else {
+				msg = fmt.Sprintf("Звіт стосовно 1 черги відпусток збережений до файлу\n%s.",
+				text_in_window)
+			logger.Println(msg)
+			}
+
+		} else {
+			logger.Println("Виберіть Excel файл ШПК!")
+		}
 	}
 
 	return BS, text_in_window, msg

@@ -301,7 +301,10 @@ func UpdateDistributionBO(
 	return factFilepath, nil
 }
 
-func SaveVacationReport1(VacReport1_ptr *[][]string) string {
-	// fmt.Println("SaveVacationReport1() called")
-	return "SaveVacationReport1() called"
+func SaveVacationReport1(VacReport1_ptr *[][]string,
+	pathReportVac1 string) (filePath string, err error) {
+
+	filePath = pathReportVac1
+	fmt.Println("SaveVacationReport1() called")
+	return "Vacation 1 report file", nil
 }
