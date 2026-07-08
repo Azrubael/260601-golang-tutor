@@ -13,7 +13,7 @@ import (
 )
 
 // AlignColumnWidth - Функція для вирівнювання динамічно по ширині колонок "B"..."I", а колонку "А" - статично. Вирівнювання для першого рядка не відбувається
-func AlignColumnWidth(xlsx *excelize.File, sheetName string,
+func AlignXlsxColumnWidth(xlsx *excelize.File, sheetName string,
 	maxRow int, maxCol int) (string, error) {
 
 		for col := 1; col <= maxCol; col++ {
@@ -241,37 +241,11 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		}
 	}
 
-	// Вирівнюємо динамічно по ширині колонки "B"..."I", а колонку "А" - статично
-	maxRow := len(reportData)
-	for col := 1; col <= 9; col++ {
-		colName, _ := excelize.ColumnNumberToName(col)
-		maxLen := 0
-		for row := 2; row <= maxRow; row++ {
-			cell, err := xlsx.GetCellValue(sheetName, fmt.Sprintf("%s%d", colName, row))
-			if err != nil {
-				log.Println("Помилка отримання кількості літерів в клітинці для вирівнювання по ширині: ", err)
-				return "", err
-			}
-			if l := utf8.RuneCountInString(cell); l > maxLen {
-				maxLen = l
-			}
-		}
-
-		var width float64 = 0
-		if col == 1 {
-			width = 15.0
-		} else {
-			width = float64(maxLen) + 2.0
-		}
-
-		if width < 10 {
-			width = 10
-		}
-
-		if err := xlsx.SetColWidth(sheetName, colName, colName, width); err != nil {
-			log.Println("Помилка вирівнювання колонок по ширині: ", err)
-			return "", err
-		}
+	// Вирівнюємо динамічно по ширині колонки xlsx
+	maxRow := len(reportData) + 1
+	msg, err_align := AlignXlsxColumnWidth(xlsx, sheetName, maxRow, 9)
+	if err_align != nil {
+		log.Printf("При вирівнюванні xlsx аркуша %s виникла помилка:\n%v", msg, err_align)
 	}
 
 	// Зберігаємо дані в файл
@@ -381,6 +355,13 @@ func SaveVacationReport1(VacReport1_ptr *[][]string,
 	if err := xlsx.SetCellStyle(sheetName, "A1", "I1", boldStyle); err != nil {
 		log.Printf("Помилка встановлення артібуту 'жирні літери' для першого рядка: \n%v", err)
 		return "", err
+	}
+
+	// Вирівнюємо динамічно по ширині колонки xlsx
+	maxRow := len(*VacReport1_ptr) + 1
+	msg, err_align := AlignXlsxColumnWidth(xlsx, sheetName, maxRow, 9)
+	if err_align != nil {
+		log.Printf("При вирівнюванні xlsx аркуша %s виникла помилка:\n%v", msg, err_align)
 	}
 
 	// Зберігаємо дані в файл
