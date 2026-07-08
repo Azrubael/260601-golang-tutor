@@ -3,7 +3,6 @@ package gio_win
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
 // makeListOfCompanies - Створення списку підрозділів з нульовими даними розподілу int(0)
@@ -269,10 +268,6 @@ func PrepareVacationReport1(shpkDataPtr *map[string]Person) (
 		}
 	}
 
-	now := time.Now()
-	dateTime := now.Format("02.01.2006")
-	firstLineText := fmt.Sprintf("Кількість особового складу 3бо, що відгуляла першу частину щорічної відпустки станом на %v", dateTime)
-	VacReport1 = append(VacReport1, []string{firstLineText, "", "", ""})
 	VacReport1 = append(VacReport1, []string{"Підрозділ", "За списком", "Відгуляли", "Процент"})
 
 	for _, cl := range COMP_list{

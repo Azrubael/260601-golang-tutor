@@ -12,6 +12,43 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
+// AlignColumnWidth - Функція для вирівнювання динамічно по ширині колонок "B"..."I", а колонку "А" - статично. Вирівнювання для першого рядка не відбувається
+func AlignColumnWidth(xlsx *excelize.File, sheetName string,
+	maxRow int, maxCol int) (string, error) {
+
+		for col := 1; col <= maxCol; col++ {
+		colName, _ := excelize.ColumnNumberToName(col)
+		maxLen := 0
+			for row := 2; row <= maxRow; row++ {
+				cell, err := xlsx.GetCellValue(sheetName, fmt.Sprintf("%s%d", colName, row))
+				if err != nil {
+					log.Println("Помилка отримання кількості літерів в клітинці для вирівнювання по ширині: ", err)
+					return sheetName, err
+				}
+				if l := utf8.RuneCountInString(cell); l > maxLen {
+					maxLen = l
+				}
+		}
+
+		var width float64 = 0
+		if col == 1 {
+			width = 15.0
+		} else {
+			width = float64(maxLen) + 2.0
+		}
+
+		if width < 10 {
+			width = 10
+		}
+
+		if err := xlsx.SetColWidth(sheetName, colName, colName, width); err != nil {
+			log.Println("Помилка вирівнювання колонок по ширині: ", err)
+			return sheetName, err
+		}
+	}
+	return  "", nil
+}
+
 // SetRowValueGeneric - Функція для додавання до xlsx об'єкту рядка даних []cellValue
 func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 	row int, colOffset int, values []T) error {
@@ -95,7 +132,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 
 	// fmt.Println("SaveReportPPD() called")
 	if len(*ppd_counter_ptr) == 0 || len(*ppd_list_ptr) == 0 {
-		errPtr := fmt.Errorf("Будь ласка, завантажте і підготуйте дані ШПК для звіту ППД.")
+		errPtr := fmt.Errorf("Завантажте і підготуйте дані ШПК для звіту ППД!")
 		log.Println(errPtr)
 		return "", errPtr
 	}
@@ -204,7 +241,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		}
 	}
 
-	// Вирівнюємо динамічно по ширині колонки "B"..."I"
+	// Вирівнюємо динамічно по ширині колонки "B"..."I", а колонку "А" - статично
 	maxRow := len(reportData)
 	for col := 1; col <= 9; col++ {
 		colName, _ := excelize.ColumnNumberToName(col)
@@ -304,7 +341,58 @@ func UpdateDistributionBO(
 func SaveVacationReport1(VacReport1_ptr *[][]string,
 	pathReportVac1 string) (filePath string, err error) {
 
-	filePath = pathReportVac1
-	fmt.Println("SaveVacationReport1() called")
-	return "Vacation 1 report file", nil
+	// fmt.Println("SaveVacationReport1() called")
+	if len(*VacReport1_ptr) == 0 {
+		errPtr := fmt.Errorf("Завантажте і підготуйте дані ШПК для звіту по відпусткам 1 черги!")
+		log.Println(errPtr)
+		return "", errPtr
+	}
+
+	// Створюємо об'єкт xlsx і додаємо до нього дані
+	xlsx := excelize.NewFile()
+	sheetName := xlsx.GetSheetName(xlsx.GetActiveSheetIndex())
+
+	now := time.Now()
+	dateTime := now.Format("02.01.2006")
+	firstLineText := fmt.Sprintf("Кількість особового складу 3бо, що відгуляла першу частину щорічної відпустки станом на %v", dateTime)
+	if errCell := xlsx.SetCellValue(sheetName, "A1", firstLineText); errCell != nil {
+		log.Println(errCell)
+		return "", errCell
+	}
+
+	for rowIdx, dataRow := range *VacReport1_ptr{
+		idxRow := rowIdx + 2
+		if err := SetRowValueGeneric(xlsx, sheetName, idxRow, 1, dataRow); err != nil {
+			log.Printf("Помилка запису значень рядка %d в об'єкт xlsx:\n %v", idxRow, err)
+			return "", err
+		}
+	}
+
+	// Оголошення об'єкту "жирні літери"
+	boldStyle, err := xlsx.NewStyle(&excelize.Style{
+		Font: &excelize.Font{Bold: true, Size: 12},
+	})
+	if err != nil {
+		log.Println("Помилка оголошення об'єкту 'жирні літери':", err)
+		return "", err
+	}
+
+	// Робиться перший рядок жирними літерами
+	if err := xlsx.SetCellStyle(sheetName, "A1", "I1", boldStyle); err != nil {
+		log.Printf("Помилка встановлення артібуту 'жирні літери' для першого рядка: \n%v", err)
+		return "", err
+	}
+
+	// Зберігаємо дані в файл
+	var xlsxFile = xlsxData{
+		Data:     xlsx,
+		FilePath: pathReportVac1,
+	}
+	filePath, err_save := saveXlsxFile(&xlsxFile, "d:/tmp/відпустки1черги.xlsx")
+	if err_save != nil {
+		log.Println(err_save)
+		return filePath, err_save
+	}
+
+	return filePath, nil
 }
