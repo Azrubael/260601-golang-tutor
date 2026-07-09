@@ -52,7 +52,7 @@ func RenderWindow(
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			BS, text_in_window, err_msg = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX,
+			BS, text_in_window, err_msg = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX, &SHPK_DATA,
 				input_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми

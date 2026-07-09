@@ -52,9 +52,15 @@ func categorizePPD(
 func PrepareReportPPD(shpkDataPtr *map[string]Person) (
 	map[string]Distribution, [][]ShortPersData, []string) {
 
-	ppdReportCounter := makeListOfCompanies(PPD_report_list)
 	countErr := []string{}
+	if  len(*shpkDataPtr) == 0 {
+		errMsg := "Потрібні дані для звіту ППД не отримано!"
+		fmt.Println(errMsg)
+		countErr = append(countErr, errMsg)
+		return map[string]Distribution{}, [][]ShortPersData{}, countErr
+	}
 
+	ppdReportCounter := makeListOfCompanies(PPD_report_list)
 	ppd_list := []ShortPersData{}
 	vac_list := []ShortPersData{}
 	hosp_list := []ShortPersData{}
