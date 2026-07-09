@@ -108,6 +108,9 @@ func OpenFileXlsx(title string, filePath string) (*xlsxData, error) {
 	// Відкриття файлу даних в форматі Excel
 	xlsx.Data, err = LoadExcelFile(xlsx.FilePath)
 	if err != nil {
+		msg := fmt.Sprintf("Помилка відкриття %s з даними розподілу людей:\n%v",
+					xlsx.FilePath, err)
+		log.Println(msg)
 		return &xlsx, err
 	}
 	return &xlsx, nil

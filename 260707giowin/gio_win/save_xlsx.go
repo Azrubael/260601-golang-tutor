@@ -121,9 +121,7 @@ func saveXlsxFile(xlsxPtr *xlsxData, defaultPath string) (
 		return filename, err
 	}
 
-	factFilepath = defaultPath
-	return factFilepath, nil
-
+	return filename, nil
 }
 
 // SaveReportPPD - Функція для запису звіту ППД
@@ -268,7 +266,7 @@ func UpdateDistributionBO(
 
 	switch {
 	case len(boReportCounter) == 0:
-		err_arg := fmt.Errorf("Будь ласка, завантажте і підготуйте дані ШПК для для оновлення загального розподілу.\n")
+		err_arg := fmt.Errorf("Завантажте і підготуйте дані ШПК для для оновлення загального розподілу.\n")
 		log.Println(err_arg)
 		return "", err_arg
 	case bo_xlsx_ptr == nil:

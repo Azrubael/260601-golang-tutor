@@ -61,11 +61,6 @@ func PrepareReportPPD(shpkDataPtr *map[string]Person) (
 	szch_list := []ShortPersData{}
 	asmt_list := []ShortPersData{}
 
-	if len(*shpkDataPtr) == 0 {
-		countErr = append(countErr, "Потрібні дані ШПК не зчитано з файлу.")
-		return ppdReportCounter, [][]ShortPersData{}, countErr
-	}
-
 	var aux Distribution
 	for name, shpkAttr := range *shpkDataPtr {
 		person := ShortPersData{

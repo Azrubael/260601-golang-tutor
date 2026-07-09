@@ -97,8 +97,6 @@ var (
 	PPD_COUNTER map[string]Distribution
 	// PPD_LIST - Списки людей по локаціям для звіту ППД
 	PPD_LIST [][]ShortPersData
-	// BO_COUNTER - Підготовлені дані для заповнення головної таблиці розподілу особового складу
-	BO_COUNTER map[string]map[string]Distribution
 )
 
 // ppd_report_list - Перелік категорій, за якими ведеться розподіл особового складу для звіту ППД
