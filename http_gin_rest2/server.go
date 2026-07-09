@@ -1,11 +1,14 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	gindump "github.com/tpkeeper/gin-dump"
+	"io"
+	"os"
+
 	"github.com/Azrubael/260601-golang-tutor/http_gin_rest2/controller"
 	"github.com/Azrubael/260601-golang-tutor/http_gin_rest2/middleware"
 	"github.com/Azrubael/260601-golang-tutor/http_gin_rest2/service"
+	"github.com/gin-gonic/gin"
+	gindump "github.com/tpkeeper/gin-dump"
 )
 
 var (
@@ -15,12 +18,13 @@ var (
 
 func main() {
 
-	// Logging to a file.
-	//f, _ := os.Create("gin.log")
+	f, _ := os.Create("go_output.log")
+
+	// Logging only to a file.
 	//gin.DefaultWriter = io.MultiWriter(f)
 
 	// Logging to a file AND console at the same time.
-	//gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 
 	//server := gin.Default()
 	server := gin.New()
