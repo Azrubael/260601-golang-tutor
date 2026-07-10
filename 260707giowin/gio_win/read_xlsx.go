@@ -23,13 +23,13 @@ func LoadExcelFile(filePath string) (*excelize.File, error) {
 }
 
 // OpenFileXlsx - Відкриття діалогового вікна для вибору файлу Excel
-func OpenFileXlsx(title string, filePath string) (*xlsxData, error) {
+func OpenFileXlsx(title string, filePath string) (*XlsxData, error) {
 	filterPairs := []string{
 		"Excel files (*.xlsx)", "*.xlsx",
 		"All files (*.*)", "*.*",
 	}
 
-	var xlsx xlsxData
+	var xlsx XlsxData
 	var err error
 	if filePath != "" {
 		xlsx.Data, err = LoadExcelFile(filePath)
@@ -219,7 +219,7 @@ func getCompanyForManagement(division string) (string, error) {
 }
 
 // ReadShpkData - Читання даних з ШПС в структуру даних для персоналу
-func ReadShpkData(shpkXlsxPtr *xlsxData) (*map[string]Person, error) {
+func ReadShpkData(shpkXlsxPtr *XlsxData) (*map[string]Person, error) {
 
 	if shpkXlsxPtr == nil {
 		msg := "Помилка: shpkXlsxPtr == nil"

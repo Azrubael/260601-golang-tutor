@@ -83,14 +83,14 @@ type openFileNameW struct {
 	lpTemplateName    *uint16
 }
 
-type xlsxData struct {
+type XlsxData struct {
 	Data     *excelize.File
 	FilePath string
 }
 
 var (
 	// SHPK_XLSX, BO_XLSX - Змінні для зберігання зчитаних даних ШПК та розподілу в форматі Excel
-	SHPK_XLSX, BO_XLSX xlsxData
+	SHPK_XLSX, BO_XLSX XlsxData
 	// SHPK_DATA - Підготовлені дані ШПК в форматі словника
 	SHPK_DATA map[string]Person
 	// PPD_COUNTER - Підготовлені дані для звіту ППД

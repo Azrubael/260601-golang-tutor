@@ -11,7 +11,7 @@ import (
 func handleButtonClicks(
 	gtx C,
 	BS BtnState,
-	shpkXlsxPtr, boXlsxPtr *xlsxData,
+	shpkXlsxPtr, boXlsxPtr *XlsxData,
 	shpkDataPtr *map[string]Person,
 	input_window *widget.Editor,
 	logger *log.Logger,
@@ -23,7 +23,7 @@ func handleButtonClicks(
 		default_path_vac1  = "d:/tmp/відпустки1черги.xlsx"  // Звіт по відпусткам
 		text_in_window   = default_path_ppd
 		msg              = ""
-		shpkXlsx, boXlsx xlsxData
+		shpkXlsx, boXlsx XlsxData
 		shpkData map[string]Person
 	)
 

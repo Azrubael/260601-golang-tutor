@@ -91,7 +91,7 @@ func SetRowValueGeneric[T cellValue](f *excelize.File, sheet string,
 }
 
 // saveXlsxFile - Функція для  запису типового файлу *.xlsx на жорсткий диск
-func saveXlsxFile(xlsxPtr *xlsxData, defaultPath string) (
+func saveXlsxFile(xlsxPtr *XlsxData, defaultPath string) (
 	factFilepath string, err error) {
 
 	if xlsxPtr == nil {
@@ -247,7 +247,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 	}
 
 	// Зберігаємо дані в файл
-	var xlsxFile = xlsxData{
+	var xlsxFile = XlsxData{
 		Data:     xlsx,
 		FilePath: pathReportPPD,
 	}
@@ -261,7 +261,7 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 
 // UpdateDistributionBO - Оновлення загального розподілу особового складу та запис оновлених даних в новий файл
 func UpdateDistributionBO(
-	boReportCounter map[string]map[string]Distribution, bo_xlsx_ptr *xlsxData,
+	boReportCounter map[string]map[string]Distribution, bo_xlsx_ptr *XlsxData,
 	pathReportBO string) (string, error) {
 
 	switch {
@@ -363,7 +363,7 @@ func SaveVacationReport1(VacReport1_ptr *[][]string,
 	}
 
 	// Зберігаємо дані в файл
-	var xlsxFile = xlsxData{
+	var xlsxFile = XlsxData{
 		Data:     xlsx,
 		FilePath: pathReportVac1,
 	}
