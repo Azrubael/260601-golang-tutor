@@ -10,18 +10,13 @@ import (
 
 // TestUpdateReportBO - Тест запису даних в новий файл після оновлення загального розподілу особового складу
 func TestUpdateReportBO(t *testing.T) {
-	shpk_filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpkPtr, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", shpk_filepath)
+	filepath := "d:/tmp/ШПС-T0320_.xlsx"
+	shpkDataPtr, _, err := readShpkFile(t, filepath)
 	if err != nil {
-		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk_filepath, err)
+		t.Fatalf("Помилка читання %s:\n%v", filepath, err)
 	}
 
-	shpk_table, err := gio_win.ReadShpkData(shpkPtr)
-	if err != nil {
-		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpkPtr.FilePath, err)
-	}
-
-	boReportCounter, err_count := gio_win.PrepareReportBO(shpk_table)
+	boReportCounter, err_count := gio_win.PrepareReportBO(shpkDataPtr)
 	if len(err_count) != 0 {
 		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n",
 		err)
@@ -49,21 +44,15 @@ func TestUpdateReportBO(t *testing.T) {
 	}
 }
 
-
 // TestaveVacationReport1 - Тест запису звіту по відпусткам 1 черги
 func TestSaveVacationReport1(t *testing.T) {
-	shpk_filepath := "d:/tmp/ШПС-T0320_.xlsx"
-	shpkPtr, err := gio_win.OpenFileXlsx("Тестовий текст TestReadShpkFile", shpk_filepath)
+	filepath := "d:/tmp/ШПС-T0320_.xlsx"
+	shpkDataPtr, _, err := readShpkFile(t, filepath)
 	if err != nil {
-		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpk_filepath, err)
+		t.Fatalf("Помилка читання %s:\n%v", filepath, err)
 	}
 
-	shpk_table, err := gio_win.ReadShpkData(shpkPtr)
-	if err != nil {
-		t.Fatalf("Помилка читання ШПС в файлі %s: %v\n", shpkPtr.FilePath, err)
-	}
-
-	vac1ReportPtr, err_count := gio_win.PrepareVacationReport1(shpk_table)
+	vac1ReportPtr, err_count := gio_win.PrepareVacationReport1(shpkDataPtr)
 	if len(err_count) != 0 {
 		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n",
 		err)
