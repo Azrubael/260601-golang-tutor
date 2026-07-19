@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Azrubael/260601-golang-tutor/260707giowin/gio_win"
+	"github.com/Azrubael/260601-golang-tutor/260718giowin/gio_win"
 )
 
 func readShpkFile(t *testing.T, filepath string) (
@@ -97,15 +97,15 @@ func TestPrepareReportBO(t *testing.T) {
 	}
 }
 
-// TestPrepareVacationReport1 - тестування функції PrepareVacationReport1
-func TestPrepareVacationReport1(t *testing.T) {
+// TestPrepareVacationReport - тестування функції PrepareVacationReport
+func TestPrepareVacationReport(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpkDataPtr, _, err := readShpkFile(t, filepath)
 	if err != nil {
 		t.Fatalf("Помилка читання %s:\n%v", filepath, err)
 	}
 
-	vac1, err_count := gio_win.PrepareVacationReport1(shpkDataPtr)
+	vac1, err_count := gio_win.PrepareVacationReport(shpkDataPtr)
 	if len(err_count) != 0 {
 		t.Fatalf("Помилка обробки даних для звіту по відпусткам:\n%v", err)
 	}

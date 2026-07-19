@@ -277,13 +277,84 @@ func PrepareVacationReport1(shpkDataPtr *map[string]Person) (
 		v := vac1ReportCounter[cl]
 		colB := fmt.Sprintf("%d (%d-%d-%d)", t.Total, t.Offi, t.Serg, t.Sold)
 		colC := fmt.Sprintf("%d (%d-%d-%d)", v.Total, v.Offi, v.Serg, v.Sold)
-		colD := "100.00 "
+		colD := "100.0 %"
 		if t.Total > 0 {
 			percent := 100.0 * float32(v.Total) / float32(t.Total)
-			colD = fmt.Sprintf("%.2f ", percent)
+			colD = fmt.Sprintf("%.1f ", percent) + "%"
 		}
 		VacReport1 = append(VacReport1, []string{cl, colB, colC, colD})
 	}
 
 	return &VacReport1, countErr
+}
+
+
+// PrepareVacationReport - Підготовка даних для звіту стосовно ОБОХ відгуляних частин щорічної відпустки
+func PrepareVacationReport(shpkDataPtr *map[string]Person) (
+	*[][]string, []string) {
+
+	VacReport := [][]string{}
+	countErr := []string{}
+	totalCounter := makeListOfCompanies(COMP_list)
+	vac1ReportCounter := makeListOfCompanies(COMP_list)
+	vac2ReportCounter := makeListOfCompanies(COMP_list)
+
+	var aux Distribution
+	for name, shpkAttr := range *shpkDataPtr {
+		person := ShortPersData{
+			Name:       name,
+			Department: shpkAttr.Department,
+			Rank:       shpkAttr.Rank,
+			Company:    shpkAttr.Company,
+		}
+
+		// Рахунок  загальної спискової кількості
+		aux = totalCounter[COMP_list[9]]
+		totalCounter[COMP_list[9]] = *(incrementRankCount(&aux, person.Rank))
+
+		// Рахунок спискової кількості по підрозділам
+		aux = totalCounter[person.Company]
+		totalCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
+
+		// Рахунок тих, что відгуляв першу частину відпустки
+		if shpkAttr.Vacation1 != "" {
+			aux = vac1ReportCounter[person.Company]
+			vac1ReportCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
+			aux = vac1ReportCounter[COMP_list[9]]
+			vac1ReportCounter[COMP_list[9]] = *(incrementRankCount(&aux, person.Rank))
+		}
+
+		// Рахунок тих, что відгуляв другу частину відпустки
+		if shpkAttr.Vacation2 != "" {
+			aux = vac2ReportCounter[person.Company]
+			vac2ReportCounter[person.Company] = *(incrementRankCount(&aux, person.Rank))
+			aux = vac2ReportCounter[COMP_list[9]]
+			vac2ReportCounter[COMP_list[9]] = *(incrementRankCount(&aux, person.Rank))
+		}
+	}
+
+	VacReport = append(VacReport, []string{"Підрозділ", "За списком", "Відгуляли 1", "Процент 1", "Відгуляли 2", "Процент 2"})
+
+	for _, cl := range COMP_list{
+		fmt.Println(cl)
+		t := totalCounter[cl]
+		v1 := vac1ReportCounter[cl]
+		v2 := vac2ReportCounter[cl]
+		colB := fmt.Sprintf("%d (%d-%d-%d)", t.Total, t.Offi, t.Serg, t.Sold)
+		colC := fmt.Sprintf("%d (%d-%d-%d)", v1.Total, v1.Offi, v1.Serg, v1.Sold)
+		colD := "100 %"
+		if t.Total > 0 && v1.Total < t.Total {
+			percent1 := 100 * float32(v1.Total) / float32(t.Total)
+			colD = fmt.Sprintf("%.1f ", percent1) + "%"
+		}
+		colE := fmt.Sprintf("%d (%d-%d-%d)", v2.Total, v2.Offi, v2.Serg, v2.Sold)
+		colF := "100 %"
+		if t.Total > 0 && v2.Total < t.Total {
+			percent2 := 100 * float32(v2.Total) / float32(t.Total)
+			colF = fmt.Sprintf("%.1f ", percent2) + "%"
+		}
+		VacReport = append(VacReport, []string{cl, colB, colC, colD, colE, colF})
+	}
+
+	return &VacReport, countErr
 }

@@ -291,6 +291,7 @@ func ReadShpkData(shpkXlsxPtr *XlsxData) (*map[string]Person, error) {
 						Study:        ReadCellSafe(row, 25),
 						Szch:         ReadCellSafe(row, 26),
 						Vacation1:    ReadCellSafe(row, 29),
+						Vacation2:    ReadCellSafe(row, 31),
 					}
 				}
 			}

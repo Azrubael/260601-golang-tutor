@@ -246,12 +246,15 @@ func SaveReportPPD(ppd_counter_ptr *map[string]Distribution,
 		log.Printf("При вирівнюванні xlsx аркуша %s виникла помилка:\n%v", msg, err_align)
 	}
 
+	if pathReportPPD == "" {
+		pathReportPPD = "d:/tmp/звіт_ППД.xlsx"
+	}
 	// Зберігаємо дані в файл
 	var xlsxFile = XlsxData{
 		Data:     xlsx,
 		FilePath: pathReportPPD,
 	}
-	factFilepath, err_save := saveXlsxFile(&xlsxFile, "d:/tmp/звіт_ППД.xlsx")
+	factFilepath, err_save := saveXlsxFile(&xlsxFile, pathReportPPD)
 	if err_save != nil {
 		log.Println(err_save)
 		return factFilepath, err_save
@@ -302,7 +305,7 @@ func UpdateDistributionBO(
 	}
 
 	// Зберігаємо дані в файл
-	factFilepath, err_save := saveXlsxFile(bo_xlsx_ptr, "d:/tmp/3бо.xlsx")
+	factFilepath, err_save := saveXlsxFile(bo_xlsx_ptr, pathReportBO)
 	if err_save != nil {
 		log.Println(err_save)
 		return factFilepath, err_save
@@ -310,12 +313,12 @@ func UpdateDistributionBO(
 	return factFilepath, nil
 }
 
-func SaveVacationReport1(VacReport1_ptr *[][]string,
-	pathReportVac1 string) (filePath string, err error) {
+func SaveVacationReport(VacReport1_ptr *[][]string,
+	pathReportVac string) (filePath string, err error) {
 
 	// fmt.Println("SaveVacationReport1() called")
 	if len(*VacReport1_ptr) == 0 {
-		errPtr := fmt.Errorf("Завантажте і підготуйте дані ШПК для звіту по відпусткам 1 черги!")
+		errPtr := fmt.Errorf("Завантажте і підготуйте дані ШПК для звіту по відпусткам!")
 		log.Println(errPtr)
 		return "", errPtr
 	}
@@ -326,7 +329,7 @@ func SaveVacationReport1(VacReport1_ptr *[][]string,
 
 	now := time.Now()
 	dateTime := now.Format("02.01.2006")
-	firstLineText := fmt.Sprintf("Кількість особового складу 3бо, що відгуляла першу частину щорічної відпустки станом на %v", dateTime)
+	firstLineText := fmt.Sprintf("Дані по відгуляним щорічним відпусткам особового складу 3бо станом на %v", dateTime)
 	if errCell := xlsx.SetCellValue(sheetName, "A1", firstLineText); errCell != nil {
 		log.Println(errCell)
 		return "", errCell
@@ -362,12 +365,16 @@ func SaveVacationReport1(VacReport1_ptr *[][]string,
 		log.Printf("При вирівнюванні xlsx аркуша %s виникла помилка:\n%v", msg, err_align)
 	}
 
+
+	if pathReportVac == "" {
+		pathReportVac = "d:/tmp/звіт.xlsx"
+	}
 	// Зберігаємо дані в файл
 	var xlsxFile = XlsxData{
 		Data:     xlsx,
-		FilePath: pathReportVac1,
+		FilePath: pathReportVac,
 	}
-	filePath, err_save := saveXlsxFile(&xlsxFile, "d:/tmp/відпустки1черги.xlsx")
+	filePath, err_save := saveXlsxFile(&xlsxFile, pathReportVac)
 	if err_save != nil {
 		log.Println(err_save)
 		return filePath, err_save

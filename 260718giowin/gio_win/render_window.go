@@ -52,7 +52,7 @@ func RenderWindow(
 			return typ.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, typ)
-			BS, text_in_window, err_msg = handleButtonClicks(gtx, BS, &SHPK_XLSX, &BO_XLSX, &SHPK_DATA,
+			BS, text_in_window, err_msg = handleButtonClicks(gtx, BS,
 				input_window, logger)
 
 			// Кнопки для вибору дій, які відображаються в головному вікні програми
@@ -149,7 +149,7 @@ func RenderWindow(
 						}),
 						layout.Rigid(func(gtx C) D {
 							return renderMenuButton(gtx, theme, BS.save_vacation_btn,
-								"Записати звіт по І відпустці",
+								"Записати звіт по відпусткам",
 								BS.save_vacation, BS.prepare_ppd, BS.prepare_shpk, BS.refresh_distrib)
 						}),
 					)

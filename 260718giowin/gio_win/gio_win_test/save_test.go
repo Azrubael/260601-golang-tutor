@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Azrubael/260601-golang-tutor/260707giowin/gio_win"
+	"github.com/Azrubael/260601-golang-tutor/260718giowin/gio_win"
 )
 
 // TestUpdateReportBO - Тест запису даних в новий файл після оновлення загального розподілу особового складу
@@ -44,27 +44,27 @@ func TestUpdateReportBO(t *testing.T) {
 	}
 }
 
-// TestaveVacationReport1 - Тест запису звіту по відпусткам 1 черги
-func TestSaveVacationReport1(t *testing.T) {
+// TestSaveVacationReport - Тест запису звіту по відпусткам
+func TestSaveVacationReport(t *testing.T) {
 	filepath := "d:/tmp/ШПС-T0320_.xlsx"
 	shpkDataPtr, _, err := readShpkFile(t, filepath)
 	if err != nil {
 		t.Fatalf("Помилка читання %s:\n%v", filepath, err)
 	}
 
-	vac1ReportPtr, err_count := gio_win.PrepareVacationReport1(shpkDataPtr)
+	vacReportPtr, err_count := gio_win.PrepareVacationReport(shpkDataPtr)
 	if len(err_count) != 0 {
 		t.Fatalf("Помилка обробки даних для загального розподілу підрозділу: %v\n",
 		err)
 	}
 
-	vac1ReportFile := "d:/tmp/відпустки1черга.xtxt"
-	savedFile, err_save := gio_win.SaveVacationReport1(vac1ReportPtr, vac1ReportFile)
+	vacReportFile := "d:/tmp/відпустки_тест.xlsx"
+	savedFile, err_save := gio_win.SaveVacationReport(vacReportPtr, vacReportFile)
 	if err_save != nil {
-		t.Fatalf("Помилка запису звіту про відпустки 1 черги до файлу %s:\n%v\n",
+		t.Fatalf("Помилка запису звіту про відпустки до файлу %s:\n%v\n",
 		savedFile, err)
 	} else {
-		fmt.Println("Звіт про відпустки 1 черги можна прочитати в файлі:\n",
+		fmt.Println("Звіт про відпустки можна прочитати в файлі:\n",
 		savedFile)
 	}
 }

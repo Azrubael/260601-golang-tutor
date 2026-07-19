@@ -4,7 +4,6 @@ go 1.26.3
 
 require (
 	gioui.org v0.10.1
-	github.com/Azrubael/260601-golang-tutor/260707giowin v0.0.0-20260717094157-7d4144d8f3a2
 	github.com/xuri/excelize/v2 v2.11.0
 	golang.org/x/sys v0.47.0
 )

@@ -56,6 +56,7 @@ type Person struct {
 	Study        string // Навчання
 	Szch         string // СЗЧ
 	Vacation1    string // Чи був у І частині щорічної відпустки
+	Vacation2    string // Чи був у IІ частині щорічної відпустки
 	Telephone    string // Телефон
 }
 
